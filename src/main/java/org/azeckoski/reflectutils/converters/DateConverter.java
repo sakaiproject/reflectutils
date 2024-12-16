@@ -130,7 +130,7 @@ public class DateConverter extends BaseDateFormatHolder implements Converter<Dat
         } else {
             // try to get the long value out of the string
             try {
-                long num = new Long(stringValue);
+                long num = Long.parseLong(stringValue);
                 if (num > 30000000l) {
                     // must be a UTC time code, also, we only lost a week since 1970 so whatever
                     return (T) toDate(targetType, num);

@@ -18,6 +18,7 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -139,14 +140,12 @@ public class ClassData<T> {
                     fList.add(field);
                 } else {
                     try {
-                        AccessController.doPrivileged(new PrivilegedAction<T>() {
-                            public T run() {
-                                field.setAccessible(true);
-                                return null;
-                            }
+                        AccessController.doPrivileged((PrivilegedAction<T>) () -> {
+                            field.setAccessible(true);
+                            return null;
                         });
                         fList.add(field);
-                    } catch (SecurityException e) {
+                    } catch (InaccessibleObjectException e) {
                         // oh well, this does not get added then
                     }
                 }
@@ -160,14 +159,12 @@ public class ClassData<T> {
                     mList.add(method);
                 } else {
                     try {
-                        AccessController.doPrivileged(new PrivilegedAction<T>() {
-                            public T run() {
-                                method.setAccessible(true);
-                                return null;
-                            }
+                        AccessController.doPrivileged((PrivilegedAction<T>) () -> {
+                            method.setAccessible(true);
+                            return null;
                         });
                         mList.add(method);
-                    } catch (SecurityException e) {
+                    } catch (InaccessibleObjectException e) {
                         // oh well, this does not get added then
                     }
                 }
@@ -182,14 +179,12 @@ public class ClassData<T> {
                     cList.add((Constructor<T>)constructor);
                 } else {
                     try {
-                        AccessController.doPrivileged(new PrivilegedAction<T>() {
-                            public T run() {
-                                constructor.setAccessible(true);
-                                return null;
-                            }
+                        AccessController.doPrivileged((PrivilegedAction<T>) () -> {
+                            constructor.setAccessible(true);
+                            return null;
                         });
                         cList.add((Constructor<T>)constructor);
-                    } catch (SecurityException e) {
+                    } catch (InaccessibleObjectException e) {
                         // oh well, this does not get added then
                     }
                 }

@@ -43,7 +43,7 @@ import org.azeckoski.reflectutils.map.ArrayOrderedMap;
 public class DeepUtilsTest extends TestCase {
 
     /**
-     * Test method for {@link org.sakaiproject.ReflectUtils.util.reflect.ReflectUtil#deepClone(java.lang.Object, int, java.lang.String[])}.
+     * Test method for {@link org.azeckoski.reflectutils.DeepUtils#deepClone(Object, int, String[])}.
      */
     public void testClone() {
         DeepUtils deepUtils = new DeepUtils();
@@ -118,7 +118,7 @@ public class DeepUtilsTest extends TestCase {
     }
 
     /**
-     * Test method for {@link org.sakaiproject.ReflectUtils.util.reflect.ReflectUtil#deepCopy(java.lang.Object, java.lang.Object, int, java.lang.String[], boolean)}.
+     * Test method for {@link org.azeckoski.reflectutils.DeepUtils#deepCopy(Object, Object, int, String[], boolean)}.
      */
     public void testCopy() {
         DeepUtils deepUtils = new DeepUtils();
@@ -232,7 +232,7 @@ public class DeepUtilsTest extends TestCase {
         assertEquals("OLD,BLUE", target.getMyString());
 
         // objects
-        properties.put("myInt", new Long(222));
+        properties.put("myInt", 222L);
         properties.put("myString", 55555);
         results = deepUtils.populate(target, properties);
         assertNotNull(results);
@@ -256,7 +256,7 @@ public class DeepUtilsTest extends TestCase {
         assertNotNull(results);
         assertEquals(3, results.size());
         assertNotNull(target);
-        assertEquals(new Long(1000), target.getId());
+        assertEquals(Long.valueOf(1000), target.getId());
         assertEquals("OLD", target.getExtra());
         assertEquals("33", target.getEntityId());
         assertEquals(null, target.getBool());
@@ -328,7 +328,7 @@ public class DeepUtilsTest extends TestCase {
         // get non-null object data
         m = (Map<String, Object>) map.get("testEntity"); 
         assertNotNull(m);
-        assertEquals(new Long(3), m.get("id"));
+        assertEquals(3L, m.get("id"));
         assertEquals("33", m.get("entityId"));
         assertTrue(m.containsKey("extra"));
         assertEquals(null, m.get("extra")); // null
@@ -368,7 +368,7 @@ public class DeepUtilsTest extends TestCase {
         // get non-null object data
         m = (Map<String, Object>) map.get("testEntity"); 
         assertNotNull(m);
-        assertEquals(new Long(3), m.get("id"));
+        assertEquals(3L, m.get("id"));
         assertEquals("33", m.get("entityId"));
         assertFalse(m.containsKey("extra"));
         assertEquals(null, m.get("extra")); // null
@@ -441,7 +441,7 @@ public class DeepUtilsTest extends TestCase {
         m.put("myString", "string");
         deepUtils.populate(tc, m);
         assertEquals("F1", tc.myField);
-        assertEquals(new Integer(123), tc.fieldInt);
+        assertEquals(Integer.valueOf(123), tc.fieldInt);
         assertEquals(234, tc.getMyInt());
         assertEquals("string", tc.getMyString());
 

@@ -396,16 +396,16 @@ public class JSONTranscoder implements Transcoder {
     public static final int CURRENT = 1;
     public static final int NEXT = 2;
 
-    private static Map<Character, Character> escapes = new HashMap<Character, Character>();
+    private static Map<Character, Character> escapes = new HashMap<>();
     static {
-        escapes.put(new Character('"'), new Character('"'));
-        escapes.put(new Character('\\'), new Character('\\'));
-        escapes.put(new Character('/'), new Character('/'));
-        escapes.put(new Character('b'), new Character('\b'));
-        escapes.put(new Character('f'), new Character('\f'));
-        escapes.put(new Character('n'), new Character('\n'));
-        escapes.put(new Character('r'), new Character('\r'));
-        escapes.put(new Character('t'), new Character('\t'));
+        escapes.put(Character.valueOf('"'), Character.valueOf('"'));
+        escapes.put(Character.valueOf('\\'), Character.valueOf('\\'));
+        escapes.put(Character.valueOf('/'), Character.valueOf('/'));
+        escapes.put(Character.valueOf('b'), Character.valueOf('\b'));
+        escapes.put(Character.valueOf('f'), Character.valueOf('\f'));
+        escapes.put(Character.valueOf('n'), Character.valueOf('\n'));
+        escapes.put(Character.valueOf('r'), Character.valueOf('\r'));
+        escapes.put(Character.valueOf('t'), Character.valueOf('\t'));
     }
 
     protected static char[] hex = "0123456789ABCDEF".toCharArray();
@@ -608,7 +608,7 @@ public class JSONTranscoder implements Transcoder {
                     if (c == 'u') {
                         add(unicode());
                     } else {
-                        Object value = escapes.get(new Character(c));
+                        Object value = escapes.get(Character.valueOf(c));
                         if (value != null) {
                             add(((Character) value).charValue());
                         }
