@@ -45,25 +45,25 @@ public class ConversionUtilsTest extends TestCase {
 
         // equivalent conversion also should be instantaneous since no conversion happens
         assertEquals(123, (int) convertUtils.convert(123, int.class) );
-        assertEquals(123, (int) convertUtils.convert(new Integer(123), int.class) );
+        assertEquals(123, (int) convertUtils.convert(123, int.class) );
         assertEquals("123", convertUtils.convert("123", String.class) );
         assertEquals(abc, convertUtils.convert(abc, String[].class) );
 
         // object conversion should be instant
-        assertEquals(new Integer(123), (Integer) convertUtils.convert(123, Object.class) );
+        assertEquals(123, convertUtils.convert(123, Object.class));
         assertEquals("123", convertUtils.convert("123", Object.class) );
 
         // now do actual conversions
         assertEquals(123, (int) convertUtils.convert("123", int.class) );
         assertEquals("123", convertUtils.convert("123", String.class) );
-        assertEquals(new Integer(123), convertUtils.convert("123", Integer.class) );
+        assertEquals(Integer.valueOf(123), convertUtils.convert("123", Integer.class) );
 
         // array to scalar
         assertEquals(123, (int) convertUtils.convert(new int[] {123,456}, int.class) );
         assertEquals(123, (int) convertUtils.convert(new String[] {"123","456"}, int.class) );
 
         // scalar to array
-        int[] nums = new int[] {123};
+        int[] nums;
         nums = convertUtils.convert(123, int[].class);
         assertEquals(123, nums[0]);
         nums = convertUtils.convert("123", int[].class);
@@ -155,13 +155,13 @@ public class ConversionUtilsTest extends TestCase {
         ConversionUtils convertUtils = new ConversionUtils();
 
         assertEquals(3, convertUtils.convertString("3", int.class));
-        assertEquals(new Integer(3), convertUtils.convertString("3", Integer.class));
+        assertEquals(3, convertUtils.convertString("3", Integer.class));
         int[] intArray = (int[]) convertUtils.convertString("3", int[].class);
         assertEquals(3, intArray[0]);
         assertEquals("XXX", convertUtils.convertString("XXX", Integer.class));
     }
 
-    private enum TestEnum {ONE, TWO, THREE};
+    private enum TestEnum {ONE, TWO, THREE}
     public void testConvertEnums() {
         ConversionUtils convertUtils = new ConversionUtils();
 

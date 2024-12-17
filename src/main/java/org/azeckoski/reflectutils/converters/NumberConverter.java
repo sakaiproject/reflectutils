@@ -74,7 +74,7 @@ public class NumberConverter implements Converter<Number> {
 
         // Handle Boolean
         if (value instanceof Boolean) {
-            return (T) toNumber(sourceType, targetType, ((Boolean)value).booleanValue() ? 1 : 0);
+            return (T) toNumber(sourceType, targetType, (Boolean) value ? 1 : 0);
         }
 
         // Handle Date
@@ -142,7 +142,7 @@ public class NumberConverter implements Converter<Number> {
                 throw new UnsupportedOperationException("source (" + sourceType + ") value (" 
                         + value + ") is too small for target (" + targetType + ")");
             }
-            return new Byte(value.byteValue());
+            return value.byteValue();
         }
 
         // Short
@@ -156,7 +156,7 @@ public class NumberConverter implements Converter<Number> {
                 throw new UnsupportedOperationException("source (" + sourceType + ") value (" 
                         + value + ") is too small for target (" + targetType + ")");
             }
-            return new Short(value.shortValue());
+            return value.shortValue();
         }
 
         // Integer
@@ -170,12 +170,12 @@ public class NumberConverter implements Converter<Number> {
                 throw new UnsupportedOperationException("source (" + sourceType + ") value (" 
                         + value + ") is too small for target (" + targetType + ")");
             }
-            return new Integer(value.intValue());
+            return value.intValue();
         }
 
         // Long
         if (targetType.equals(Long.class)) {
-            return new Long(value.longValue());
+            return value.longValue();
         }
 
         // Float
@@ -184,12 +184,12 @@ public class NumberConverter implements Converter<Number> {
                 throw new UnsupportedOperationException("source (" + sourceType + ") value (" 
                         + value + ") is too large for target (" + targetType + ")");
             }
-            return new Float(value.floatValue());
+            return value.floatValue();
         }
 
         // Double
         if (targetType.equals(Double.class)) {
-            return new Double(value.doubleValue());
+            return value.doubleValue();
         }
 
         // BigDecimal
