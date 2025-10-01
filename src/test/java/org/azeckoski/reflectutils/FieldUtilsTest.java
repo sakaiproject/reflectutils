@@ -14,7 +14,9 @@
 
 package org.azeckoski.reflectutils;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 import org.azeckoski.reflectutils.classes.*;
 import org.azeckoski.reflectutils.exceptions.FieldSetValueException;
 import org.azeckoski.reflectutils.exceptions.FieldnameNotFoundException;
@@ -29,11 +31,13 @@ import java.util.Map;
  * 
  * @author Aaron Zeckoski (azeckoski @ gmail.com)
  */
-public class FieldUtilsTest extends TestCase {
+public class FieldUtilsTest {
 
     /**
      * Test method for {@link org.azeckoski.reflectutils.FieldUtils#analyzeClass(java.lang.Class)}.
      */
+
+    @Test
     public void testAnalyzeClass() {
         FieldUtils fu = new FieldUtils();
         ClassFields<?> cf;
@@ -54,6 +58,8 @@ public class FieldUtilsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.FieldUtils#analyzeObject(java.lang.Object)}.
      */
+
+    @Test
     public void testAnalyzeObject() {
         FieldUtils fu = new FieldUtils();
         ClassFields<?> cf;
@@ -74,6 +80,8 @@ public class FieldUtilsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.FieldUtils#getFieldNames(java.lang.Class)}.
      */
+
+    @Test
     public void testGetFieldNames() {
         FieldUtils fu = new FieldUtils();
         List<String> names;
@@ -93,6 +101,8 @@ public class FieldUtilsTest extends TestCase {
      * Test method for findFieldValue
      */
     @SuppressWarnings({"unchecked", "UnusedAssignment"})
+
+    @Test
     public void testFindFieldValue() {
         FieldUtils fu = new FieldUtils();
         ClassFields<?> cf;
@@ -169,6 +179,8 @@ public class FieldUtilsTest extends TestCase {
      * Test method for assignFieldValue
      */
     @SuppressWarnings("unchecked")
+
+    @Test
     public void testAssignFieldValue() {
         FieldUtils fu = new FieldUtils();
         ClassFields<?> cf;
@@ -237,6 +249,8 @@ public class FieldUtilsTest extends TestCase {
     /**
      * Test method for getSimpleValue
      */
+
+    @Test
     public void testGetSimpleValue() {
         FieldUtils fu = new FieldUtils();
         Object value;
@@ -272,6 +286,8 @@ public class FieldUtilsTest extends TestCase {
      * Test method for {@link org.azeckoski.reflectutils.FieldUtils#getIndexedValue(java.lang.Object, java.lang.String)}.
      */
     @SuppressWarnings("UnusedAssignment")
+
+    @Test
     public void testGetIndexedValue() {
         FieldUtils fu = new FieldUtils();
         Object value;
@@ -341,6 +357,8 @@ public class FieldUtilsTest extends TestCase {
      * Test method for {@link org.azeckoski.reflectutils.FieldUtils#getMappedValue(java.lang.Object, java.lang.String)}.
      */
     @SuppressWarnings("UnusedAssignment")
+
+    @Test
     public void testGetMappedValue() {
         FieldUtils fu = new FieldUtils();
         Object value;
@@ -395,6 +413,8 @@ public class FieldUtilsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.FieldUtils#getValueOfMap(java.util.Map, java.lang.String)}.
      */
+
+    @Test
     public void testGetValueOfMap() {
         FieldUtils fu = new FieldUtils();
         Object value;
@@ -419,6 +439,8 @@ public class FieldUtilsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.FieldUtils#setSimpleValue(java.lang.Object, java.lang.String, java.lang.Object)}.
      */
+
+    @Test
     public void testSetSimpleValue() {
         FieldUtils fu = new FieldUtils();
 
@@ -465,6 +487,8 @@ public class FieldUtilsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.FieldUtils#setIndexedValue(java.lang.Object, java.lang.String, java.lang.Object)}.
      */
+
+    @Test
     public void testSetIndexedValue() {
         FieldUtils fu = new FieldUtils();
 
@@ -514,6 +538,10 @@ public class FieldUtilsTest extends TestCase {
         //noinspection AssertEqualsBetweenInconvertibleTypes
         assertEquals("BBB", myList.get(1));
     }
+
+
+    @Test
+
 
     public void testCollections() {
         FieldUtils fu = new FieldUtils();
@@ -567,6 +595,8 @@ public class FieldUtilsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.FieldUtils#setMappedValue(java.lang.Object, java.lang.String, java.lang.Object)}.
      */
+
+    @Test
     public void testSetMappedValue() {
         FieldUtils fu = new FieldUtils();
 
@@ -622,6 +652,8 @@ public class FieldUtilsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.FieldUtils#setValueOfMap(java.util.Map, java.lang.String, java.lang.Object)}.
      */
+
+    @Test
     public void testSetValueOfMap() {
         FieldUtils fu = new FieldUtils();
 
@@ -646,6 +678,8 @@ public class FieldUtilsTest extends TestCase {
      * Test method for {@link org.azeckoski.reflectutils.FieldUtils#getFieldValue(java.lang.Object, java.lang.String)}.
      */
     @SuppressWarnings({"unchecked", "UnusedAssignment"})
+
+    @Test
     public void testGetFieldValue() {
         FieldUtils fu = new FieldUtils();
         Object value;
@@ -770,6 +804,10 @@ public class FieldUtilsTest extends TestCase {
         assertEquals(24, value);
     }
 
+
+    @Test
+
+
     public void testGetFieldValueAsType() {
         FieldUtils fu = FieldUtils.getInstance();
         Object value;
@@ -805,6 +843,8 @@ public class FieldUtilsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.FieldUtils#setFieldValue(java.lang.Object, java.lang.String, java.lang.Object)}.
      */
+
+    @Test
     public void testSetFieldValue() {
         FieldUtils fu = new FieldUtils();
 
@@ -922,6 +962,10 @@ public class FieldUtilsTest extends TestCase {
         assertEquals("delta", myMap.get("D"));
     }
 
+
+    @Test
+
+
     public void testSetNoConvert() {
         FieldUtils fu = new FieldUtils();
 
@@ -987,6 +1031,8 @@ public class FieldUtilsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.FieldUtils#getFieldValues(java.lang.Object)}.
      */
+
+    @Test
     public void testGetFieldValues() {
         FieldUtils fu = new FieldUtils();
         Map<String, Object> m;
@@ -1118,6 +1164,10 @@ public class FieldUtilsTest extends TestCase {
         assertNotNull(m.get("testEntity"));
     }
 
+
+    @Test
+
+
     public void testAutoCreateBeans() {
         FieldUtils fu = new FieldUtils();
 
@@ -1151,6 +1201,10 @@ public class FieldUtilsTest extends TestCase {
         assertTrue(tc.map.containsKey("user"));
         assertEquals("AZ", fu.getFieldValue(tc, "map.user.name"));
     }
+
+
+    @Test
+
 
     public void testNonVisibleFields() {
         FieldUtils fu = FieldUtils.getInstance();

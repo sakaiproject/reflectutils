@@ -1034,9 +1034,9 @@ public class FieldUtils {
                                 // create the list if it is null, back-fill it, and assign it back to the object
                                 Class<?> type = cp.getType();
                                 if (type.isInterface()) {
-                                    indexedObject = new ArrayList(index+1);
+                                    indexedObject = new ArrayList<>(index + 1);
                                 } else {
-                                    indexedObject = type.newInstance();
+                                    indexedObject = getConstructorUtils().constructClass(type);
                                 }
                             }
                             setSimpleValue(obj, name, indexedObject);
@@ -1167,7 +1167,7 @@ public class FieldUtils {
                             if (type.isInterface()) {
                                 map = new ArrayOrderedMap(5);
                             } else {
-                                map = (Map) type.newInstance();
+                                map = (Map) getConstructorUtils().constructClass(type);
                             }
                             setSimpleValue(obj, name, map);
                         } catch (Exception e) {

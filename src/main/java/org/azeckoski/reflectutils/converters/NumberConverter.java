@@ -142,7 +142,7 @@ public class NumberConverter implements Converter<Number> {
                 throw new UnsupportedOperationException("source (" + sourceType + ") value (" 
                         + value + ") is too small for target (" + targetType + ")");
             }
-            return new Byte(value.byteValue());
+            return Byte.valueOf(value.byteValue());
         }
 
         // Short
@@ -156,7 +156,7 @@ public class NumberConverter implements Converter<Number> {
                 throw new UnsupportedOperationException("source (" + sourceType + ") value (" 
                         + value + ") is too small for target (" + targetType + ")");
             }
-            return new Short(value.shortValue());
+            return Short.valueOf(value.shortValue());
         }
 
         // Integer
@@ -170,12 +170,12 @@ public class NumberConverter implements Converter<Number> {
                 throw new UnsupportedOperationException("source (" + sourceType + ") value (" 
                         + value + ") is too small for target (" + targetType + ")");
             }
-            return new Integer(value.intValue());
+            return Integer.valueOf(value.intValue());
         }
 
         // Long
         if (targetType.equals(Long.class)) {
-            return new Long(value.longValue());
+            return Long.valueOf(value.longValue());
         }
 
         // Float
@@ -184,12 +184,12 @@ public class NumberConverter implements Converter<Number> {
                 throw new UnsupportedOperationException("source (" + sourceType + ") value (" 
                         + value + ") is too large for target (" + targetType + ")");
             }
-            return new Float(value.floatValue());
+            return Float.valueOf(value.floatValue());
         }
 
         // Double
         if (targetType.equals(Double.class)) {
-            return new Double(value.doubleValue());
+            return Double.valueOf(value.doubleValue());
         }
 
         // BigDecimal

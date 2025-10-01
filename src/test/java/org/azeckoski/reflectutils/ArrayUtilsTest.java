@@ -17,7 +17,9 @@ package org.azeckoski.reflectutils;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests the various methods used to analyze a class and cache the information
@@ -25,11 +27,12 @@ import junit.framework.TestCase;
  * 
  * @author Aaron Zeckoski (azeckoski@gmail.com)
  */
-public class ArrayUtilsTest extends TestCase {
+public class ArrayUtilsTest {
 
     /**
      * Test method for {@link org.azeckoski.reflectutils.ArrayUtils#resize(T[], int)}.
      */
+    @Test
     public void testResize() {
         String[] array = new String[] {"A","B","C","D"};
 
@@ -68,6 +71,7 @@ public class ArrayUtilsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ArrayUtils#removeDuplicates(java.util.List)}.
      */
+    @Test
     public void testRemoveDuplicates() {
         List<String> list = new ArrayList<String>();
         list.add("A");

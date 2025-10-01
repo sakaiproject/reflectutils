@@ -46,7 +46,7 @@ public class FieldAdapterManager {
             } else {
                 // found the adapter class
                 try {
-                    fieldAdapter = (FieldAdapter) adapterClass.newInstance();
+                    fieldAdapter = (FieldAdapter) adapterClass.getDeclaredConstructor().newInstance();
                 } catch (Exception e) {
                     System.err.println("WARN: Failed to instantiate field adapter ("+adapterClass+"), will continue without the dynabean adapter: "+e);
                     //throw new RuntimeException("Failed to instantiate field adapter ("+adapterClass+"): "+e, e);

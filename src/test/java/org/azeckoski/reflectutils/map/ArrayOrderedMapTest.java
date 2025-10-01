@@ -22,19 +22,22 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * testing the ordered map
  * 
  * @author Aaron Zeckoski (azeckoski @ gmail.com)
  */
-public class ArrayOrderedMapTest extends TestCase {
+public class ArrayOrderedMapTest {
 
     private ArrayOrderedMap<String, String> m1 = null;
 
-    @Override
-    protected void setUp() throws Exception {
+    @BeforeEach
+    void setUp() {
         m1 = new ArrayOrderedMap<String, String>();
         m1.put("AAA", "aaronz");
         m1.put("BBB", "beckyz");
@@ -44,6 +47,8 @@ public class ArrayOrderedMapTest extends TestCase {
     /**
      * Test method for {@link org.sakaiproject.entitybroker.util.map.OrderedMap#clear()}.
      */
+
+    @Test
     public void testClear() {
         assertNotNull(m1);
         assertEquals(3, m1.size());
@@ -57,6 +62,8 @@ public class ArrayOrderedMapTest extends TestCase {
     /**
      * Test method for {@link org.sakaiproject.entitybroker.util.map.OrderedMap#getKeys()}.
      */
+
+    @Test
     public void testGetKeys() {
         List<String> keys = m1.getKeys();
         assertNotNull(keys);
@@ -69,6 +76,8 @@ public class ArrayOrderedMapTest extends TestCase {
     /**
      * testing the get values method
      */
+
+    @Test
     public void testGetValues() {
         List<String> keys = m1.getValues();
         assertNotNull(keys);
@@ -81,6 +90,8 @@ public class ArrayOrderedMapTest extends TestCase {
     /**
      * Test method for {@link org.sakaiproject.entitybroker.util.map.OrderedMap#getEntries()}.
      */
+
+    @Test
     public void testGetEntries() {
         List<Entry<String, String>> entries = m1.getEntries();
         assertNotNull(entries);
@@ -93,6 +104,10 @@ public class ArrayOrderedMapTest extends TestCase {
         assertEquals("cat", entries.get(2).getValue());
     }
 
+
+    @Test
+
+
     public void testGet() {
         assertEquals("aaronz", m1.get("AAA"));
         assertEquals("beckyz", m1.get("BBB"));
@@ -101,6 +116,10 @@ public class ArrayOrderedMapTest extends TestCase {
         m1.put("null", null);
         assertEquals(null, m1.get("null"));
     }
+
+
+    @Test
+
 
     public void testGetEntry() {
         Entry<String, String> entry = m1.getEntry(1);
@@ -114,6 +133,10 @@ public class ArrayOrderedMapTest extends TestCase {
             assertNotNull(e.getMessage());
         }
     }
+
+
+    @Test
+
 
     public void testPutKV() {
         m1.put("DDD", "dog");
@@ -149,6 +172,8 @@ public class ArrayOrderedMapTest extends TestCase {
     /**
      * Test method for {@link org.sakaiproject.entitybroker.util.map.OrderedMap#remove(java.lang.Object)}.
      */
+
+    @Test
     public void testRemoveObject() {
         String val = m1.remove("AAA");
         assertNotNull(val);
@@ -168,6 +193,8 @@ public class ArrayOrderedMapTest extends TestCase {
     /**
      * Test method for {@link org.sakaiproject.entitybroker.util.map.OrderedMap#keys()}.
      */
+
+    @Test
     public void testKeys() {
         Enumeration<String> e = m1.keys();
         assertTrue( e.hasMoreElements() );
@@ -188,6 +215,8 @@ public class ArrayOrderedMapTest extends TestCase {
     /**
      * Test method for {@link org.sakaiproject.entitybroker.util.map.OrderedMap#elements()}.
      */
+
+    @Test
     public void testElements() {
         Enumeration<String> e = m1.elements();
         assertTrue( e.hasMoreElements() );
@@ -204,6 +233,11 @@ public class ArrayOrderedMapTest extends TestCase {
             assertNotNull(ne.getMessage());
         }
     }
+
+
+
+    @Test
+
 
 
     public void testKeySet() {
@@ -243,6 +277,8 @@ public class ArrayOrderedMapTest extends TestCase {
     /**
      * Test method for {@link org.sakaiproject.entitybroker.util.map.OrderedMap#values()}.
      */
+
+    @Test
     public void testValues() {
         Collection<String> values = m1.values();
         assertEquals(3, values.size());
@@ -280,6 +316,8 @@ public class ArrayOrderedMapTest extends TestCase {
     /**
      * Test method for {@link org.sakaiproject.entitybroker.util.map.OrderedMap#entrySet()}.
      */
+
+    @Test
     public void testEntrySet() {
         Set<Entry<String, String>> entries = m1.entrySet();
         assertEquals(3, entries.size());

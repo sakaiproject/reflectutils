@@ -14,7 +14,9 @@
 
 package org.azeckoski.reflectutils;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 import org.azeckoski.reflectutils.ClassFields.FieldFindMode;
 import org.azeckoski.reflectutils.ClassFields.FieldsFilter;
 import org.azeckoski.reflectutils.annotations.*;
@@ -38,11 +40,13 @@ import java.util.Set;
  * @author Aaron Zeckoski (azeckoski@gmail.com)
  */
 @SuppressWarnings("unchecked")
-public class ClassFieldsTest extends TestCase {
+public class ClassFieldsTest {
 
     /**
      * Test method for {@link org.azeckoski.reflectutils.ClassFields#ClassFields(java.lang.Class, java.lang.reflect.Method[], java.lang.reflect.Method[], java.lang.reflect.Field[])}.
      */
+
+    @Test
     public void testClassFieldsClassOfQMethodArrayMethodArrayFieldArray() {
         ClassFields<?> cf = null;
 
@@ -95,6 +99,8 @@ public class ClassFieldsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ClassFields#ClassFields(java.lang.Class, java.beans.PropertyDescriptor[], java.lang.reflect.Field[])}.
      */
+
+    @Test
     public void testClassFieldsClassOfQPropertyDescriptorArrayFieldArray() {
         ClassFields<?> cf = null;
 
@@ -143,6 +149,8 @@ public class ClassFieldsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ClassFields#ClassFields(java.lang.Class, boolean)}.
      */
+
+    @Test
     public void testClassFieldsClassOfQBoolean() {
         ClassFields<?> cf = null;
 
@@ -168,6 +176,10 @@ public class ClassFieldsTest extends TestCase {
             assertNotNull(e.getMessage());
         }
     }
+
+
+    @Test
+
 
     public void testClassFieldsModes() {
         ClassFields<?> cf = null;
@@ -270,6 +282,8 @@ public class ClassFieldsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ClassFields#ClassFields(java.lang.Class)}.
      */
+
+    @Test
     public void testClassFieldsClassOfQ() {
         ClassFields<?> cf = null;
 
@@ -350,6 +364,8 @@ public class ClassFieldsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ClassFields#getFieldClass()}.
      */
+
+    @Test
     public void testGetFieldClass() {
         ClassFields<?> cf = null;
 
@@ -384,6 +400,8 @@ public class ClassFieldsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ClassFields#getFieldNames()}.
      */
+
+    @Test
     public void testGetFieldNames() {
         ClassFields<?> cf = null;
         List<String> names = null;
@@ -446,6 +464,8 @@ public class ClassFieldsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ClassFields#getAllFieldNames()}.
      */
+
+    @Test
     public void testGetAllFieldNames() {
         ClassFields<?> cf = null;
         List<String> names = null;
@@ -494,6 +514,8 @@ public class ClassFieldsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ClassFields#getFieldTypes()}.
      */
+
+    @Test
     public void testGetFieldTypes() {
         ClassFields<?> cf = null;
         Map<String, Class<?>> types = null;
@@ -566,6 +588,8 @@ public class ClassFieldsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ClassFields#getFieldTypes(FieldsFilter.WRITEABLE)}.
      */
+
+    @Test
     public void testGetAllSettableFieldTypes() {
         ClassFields<?> cf = null;
         Map<String, Class<?>> types = null;
@@ -644,6 +668,8 @@ public class ClassFieldsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ClassFields#getAllGettableFieldTypes()}.
      */
+
+    @Test
     public void testGetAllGettableFieldTypes() {
         ClassFields<?> cf = null;
         Map<String, Class<?>> types = null;
@@ -720,6 +746,10 @@ public class ClassFieldsTest extends TestCase {
         assertEquals(String.class, types.get("entityId"));
     }
 
+
+    @Test
+
+
     public void testGetFieldTypesFilter() {
         ClassFields<?> cf = null;
         Map<String, Class<?>> types = null;
@@ -768,6 +798,8 @@ public class ClassFieldsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ClassFields#size()}.
      */
+
+    @Test
     public void testSize() {
         ClassFields<?> cf = null;
 
@@ -791,6 +823,10 @@ public class ClassFieldsTest extends TestCase {
         assertNotNull(cf);
         assertEquals(6, cf.size());
     }
+
+
+    @Test
+
 
     public void testSizeFilter() {
         ClassFields<?> cf = null;
@@ -825,6 +861,8 @@ public class ClassFieldsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ClassFields#isEmpty()}.
      */
+
+    @Test
     public void testIsEmpty() {
         ClassFields<?> cf = null;
 
@@ -848,6 +886,10 @@ public class ClassFieldsTest extends TestCase {
         assertNotNull(cf);
         assertFalse(cf.isEmpty());
     }
+
+
+    @Test
+
 
     public void testIsEmptyFilter() {
         ClassFields<?> cf = null;
@@ -880,6 +922,8 @@ public class ClassFieldsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ClassFields#isFieldNameValid(java.lang.String)}.
      */
+
+    @Test
     public void testIsFieldNameValid() {
         ClassFields<?> cf = null;
 
@@ -959,6 +1003,8 @@ public class ClassFieldsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ClassFields#isFieldNameValid(java.lang.String)}.
      */
+
+    @Test
     public void testIsAnyFieldNameValid() {
         ClassFields<?> cf = null;
 
@@ -1038,6 +1084,8 @@ public class ClassFieldsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ClassFields#getFieldType(java.lang.String)}.
      */
+
+    @Test
     public void testGetFieldType() {
         ClassFields<?> cf = null;
 
@@ -1071,6 +1119,8 @@ public class ClassFieldsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ClassFields#getClassProperty(java.lang.String)}.
      */
+
+    @Test
     public void testGetFieldProperty() {
         ClassFields<?> cf = null;
         ClassProperty cp = null;
@@ -1237,6 +1287,10 @@ public class ClassFieldsTest extends TestCase {
 
     }
 
+
+    @Test
+
+
     public void testPartialComplete() {
         ClassFields<?> cf = null;
         ClassProperty cp = null;
@@ -1333,6 +1387,11 @@ public class ClassFieldsTest extends TestCase {
         assertTrue( cp.isSettable() );
         assertFalse( cp.isTransient() );
     }
+
+
+
+    @Test
+
 
 
     public void testTransientFinal() {
@@ -1456,6 +1515,10 @@ public class ClassFieldsTest extends TestCase {
         assertFalse( cp.isTransient() );
     }
 
+
+    @Test
+
+
     public void testGetAllClassProperties() {
         ClassFields<?> cf = null;
         Map<String, ClassProperty> m = null;
@@ -1488,6 +1551,8 @@ public class ClassFieldsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ClassFields#getClassAnnotations()}.
      */
+
+    @Test
     public void testGetClassAnnotations() {
         ClassFields<?> cf = null;
         Set<Annotation> s = null;
@@ -1536,6 +1601,8 @@ public class ClassFieldsTest extends TestCase {
     /**
      * Test getting a single annotation from a class by type
      */
+
+    @Test
     public void testGetClassAnnotation() {
         ClassFields<?> cf = null;
 
@@ -1567,6 +1634,8 @@ public class ClassFieldsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ClassFields#getFieldAnnotations(java.lang.String)}.
      */
+
+    @Test
     public void testGetFieldAnnotations() {
         ClassFields<?> cf = null;
         Set<Annotation> s = null;
@@ -1614,6 +1683,8 @@ public class ClassFieldsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ClassFields#getFieldAnnotation(java.lang.Class, java.lang.String)}.
      */
+
+    @Test
     public void testGetFieldAnnotation() {
         ClassFields<?> cf = null;
 
@@ -1660,6 +1731,8 @@ public class ClassFieldsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ClassFields#getFieldNameByAnnotation(java.lang.Class)}.
      */
+
+    @Test
     public void testGetFieldNameByAnnotation() {
         ClassFields<?> cf = null;
 
@@ -1690,6 +1763,8 @@ public class ClassFieldsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ClassFields#makeFieldNameFromMethod(java.lang.String)}.
      */
+
+    @Test
     public void testMakeFieldNameFromMethod() {
         String name = null;
 
@@ -1712,6 +1787,8 @@ public class ClassFieldsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ClassFields#capitalize(java.lang.String)}.
      */
+
+    @Test
     public void testCapitalize() {
         assertTrue( ClassFields.capitalize("lower").equals("Lower") );
         assertTrue( ClassFields.capitalize("UPPER").equals("UPPER") );
@@ -1724,6 +1801,8 @@ public class ClassFieldsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ClassFields#unCapitalize(java.lang.String)}.
      */
+
+    @Test
     public void testUnCapitalize() {
         assertTrue( ClassFields.unCapitalize("lower").equals("lower") );
         assertTrue( ClassFields.unCapitalize("UPPER").equals("uPPER") );
@@ -1736,6 +1815,8 @@ public class ClassFieldsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ClassFields#isGetClassMethod(java.lang.reflect.Method)}.
      */
+
+    @Test
     public void testIsGetClassMethod() {
         Method m = null;
 
@@ -1754,6 +1835,10 @@ public class ClassFieldsTest extends TestCase {
         }
     }
 
+
+    @Test
+
+
     public void testExcludeFields() {
         ClassFields<?> cf = null;
 
@@ -1767,6 +1852,10 @@ public class ClassFieldsTest extends TestCase {
         assertEquals(2, cf.getFieldNames().size());
 
     }
+
+
+    @Test
+
 
     public void testExcludeStaticFields() {
         ClassFields<?> cf = null;
@@ -1782,6 +1871,10 @@ public class ClassFieldsTest extends TestCase {
         assertFalse(cf.isFieldNameValid("sbool"));
         assertEquals(2, cf.getFieldNames().size());
     }
+
+
+    @Test
+
 
     public void testIncludeStaticFields() {
         ClassFields<?> cf = null;

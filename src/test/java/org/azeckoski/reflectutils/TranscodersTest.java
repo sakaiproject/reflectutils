@@ -21,7 +21,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.azeckoski.reflectutils.classes.TestBaseOne;
 import org.azeckoski.reflectutils.classes.TestBean;
@@ -43,9 +45,11 @@ import org.azeckoski.reflectutils.transcoders.XMLTranscoder;
  * 
  * @author Aaron Zeckoski (azeckoski @ gmail.com)
  */
-public class TranscodersTest extends TestCase {
+public class TranscodersTest {
 
     // testing the internal encoder
+
+    @Test
     public void testJSONEncode() {
         Transcoder transcoder = new JSONTranscoder(true, true, false);
         String encoded = null;
@@ -183,6 +187,10 @@ public class TranscodersTest extends TestCase {
 
     }
 
+
+    @Test
+
+
     public void testJSONEncodeInvalid() {
         JSONTranscoder transcoder = new JSONTranscoder();
         JsonReader reader = transcoder.new JsonReader();
@@ -248,6 +256,10 @@ public class TranscodersTest extends TestCase {
         }
         return new String(text);
     }
+
+
+    @Test
+
 
     public void testJSONEncodeProperties() {
         Transcoder transcoder = new JSONTranscoder(true, true, false);
@@ -434,6 +446,8 @@ public class TranscodersTest extends TestCase {
 
     // testing the internal decoder
     @SuppressWarnings("unchecked")
+
+    @Test
     public void testJSONDecode() {
         Transcoder transcoder = new JSONTranscoder();
         Map<String, Object> decoded = null;
@@ -570,6 +584,10 @@ public class TranscodersTest extends TestCase {
         assertEquals(null, decoded.get("myString"));
 
     }
+
+
+    @Test
+
 
     public void testXMLEncode() {
         Transcoder transcoder = new XMLTranscoder(false, true, false);
@@ -789,6 +807,10 @@ public class TranscodersTest extends TestCase {
         }
     }
 
+
+    @Test
+
+
     public void testXMLEncodeSpecial() {
         Transcoder transcoder = new XMLTranscoder(false, true, false);
         String encoded = null;
@@ -814,6 +836,10 @@ public class TranscodersTest extends TestCase {
         assertTrue(encoded.contains("777"));
         assertTrue(encoded.contains("888"));
     }
+
+
+    @Test
+
 
     public void testXMLEncodeProperties() {
         Transcoder transcoder = new XMLTranscoder(true, true, false);
@@ -1000,6 +1026,8 @@ public class TranscodersTest extends TestCase {
 
     // testing the internal decoder
     @SuppressWarnings("unchecked")
+
+    @Test
     public void testXMLDecode() {
         Transcoder transcoder = new XMLTranscoder(true, true, false);
         Map<String, Object> decoded = null;
@@ -1141,6 +1169,8 @@ public class TranscodersTest extends TestCase {
     }
 
     @SuppressWarnings("unchecked")
+
+    @Test
     public void testXMLDecodeWithoutTypes() {
         Transcoder transcoder = new XMLTranscoder(true, true, false);
         Map<String, Object> decoded = null;
@@ -1209,6 +1239,10 @@ public class TranscodersTest extends TestCase {
         assertEquals("laptop", pets.get(2).get("type"));
         assertNull( people.get(1).get("pets") );
     }
+
+
+    @Test
+
 
     public void testHTMLEncode() {
         Transcoder transcoder = new HTMLTranscoder(true, true, false);
@@ -1345,6 +1379,10 @@ public class TranscodersTest extends TestCase {
 
     }
 
+
+    @Test
+
+
     public void testLoopStoppingJSON() {
         Transcoder transcoder = new JSONTranscoder(true, true, false);
         String encoded = null;
@@ -1357,6 +1395,10 @@ public class TranscodersTest extends TestCase {
         assertTrue(size < 200000);
         
     }
+
+
+    @Test
+
 
     public void testLoopStoppingXML() {
         Transcoder transcoder = new XMLTranscoder(true, true, false);
@@ -1371,6 +1413,10 @@ public class TranscodersTest extends TestCase {
         
     }
 
+
+    @Test
+
+
     public void testCrazyClassesJSON() {
         TestHibernateLikeBean crazy = new TestHibernateLikeBean();
 
@@ -1384,6 +1430,10 @@ public class TranscodersTest extends TestCase {
         assertTrue(size < 1000);
     }
 
+
+    @Test
+
+
     public void testCrazyClassesXML() {
         TestHibernateLikeBean crazy = new TestHibernateLikeBean();
 
@@ -1396,6 +1446,10 @@ public class TranscodersTest extends TestCase {
         assertTrue(size > 100);
         assertTrue(size < 1000);
     }
+
+
+    @Test
+
 
     public void testDateEncoding() {
         Transcoder transcoder = new JSONTranscoder(false, true, false);

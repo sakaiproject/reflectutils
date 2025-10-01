@@ -29,7 +29,9 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.azeckoski.reflectutils.classes.TestBean;
 import org.azeckoski.reflectutils.classes.TestExtendBean;
@@ -45,11 +47,13 @@ import org.azeckoski.reflectutils.map.ArrayOrderedMap;
  * 
  * @author Aaron Zeckoski (azeckoski @ gmail.com)
  */
-public class ConstructorUtilsTest extends TestCase {
+public class ConstructorUtilsTest {
 
     /**
      * Test method for {@link org.azeckoski.reflectutils.ConstructorUtils#isClassArray(java.lang.Class)}.
      */
+
+    @Test
     public void testIsClassArray() {
         assertFalse(ConstructorUtils.isClassArray(String.class));
         assertFalse(ConstructorUtils.isClassArray(int.class));
@@ -64,6 +68,8 @@ public class ConstructorUtilsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ConstructorUtils#isClassPrimitive(java.lang.Class)}.
      */
+
+    @Test
     public void testIsClassPrimitive() {
         assertFalse(ConstructorUtils.isClassPrimitive(String.class));
         assertTrue(ConstructorUtils.isClassPrimitive(int.class));
@@ -78,6 +84,8 @@ public class ConstructorUtilsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ConstructorUtils#isClassList(java.lang.Class)}.
      */
+
+    @Test
     public void testIsClassList() {
         assertFalse(ConstructorUtils.isClassList(String.class));
         assertFalse(ConstructorUtils.isClassList(int.class));
@@ -92,6 +100,8 @@ public class ConstructorUtilsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ConstructorUtils#isClassCollection(java.lang.Class)}.
      */
+
+    @Test
     public void testIsClassCollection() {
         assertFalse(ConstructorUtils.isClassCollection(String.class));
         assertFalse(ConstructorUtils.isClassCollection(int.class));
@@ -106,6 +116,8 @@ public class ConstructorUtilsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ConstructorUtils#isClassMap(java.lang.Class)}.
      */
+
+    @Test
     public void testIsClassMap() {
         assertFalse(ConstructorUtils.isClassMap(String.class));
         assertFalse(ConstructorUtils.isClassMap(int.class));
@@ -120,6 +132,8 @@ public class ConstructorUtilsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ConstructorUtils#isClassObjectHolder(java.lang.Class)}.
      */
+
+    @Test
     public void testIsClassObjectHolder() {
         assertFalse(ConstructorUtils.isClassObjectHolder(String.class));
         assertFalse(ConstructorUtils.isClassObjectHolder(int.class));
@@ -134,6 +148,8 @@ public class ConstructorUtilsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ConstructorUtils#getTypeFromArray(java.lang.Class)}.
      */
+
+    @Test
     public void testGetTypeFromArray() {
         assertEquals(String.class, ConstructorUtils.getTypeFromArray(String[].class));
         assertEquals(int.class, ConstructorUtils.getTypeFromArray(int[].class));
@@ -144,6 +160,8 @@ public class ConstructorUtilsTest extends TestCase {
      * Test method for {@link org.azeckoski.reflectutils.ConstructorUtils#getClassFromInterface(java.lang.Class)}.
      */
     @SuppressWarnings("unchecked")
+
+    @Test
     public void testGetClassFromInterface() {
         assertEquals(Vector.class, ConstructorUtils.getClassFromInterface(List.class));
         assertEquals(HashSet.class, ConstructorUtils.getClassFromInterface(Set.class));
@@ -168,6 +186,8 @@ public class ConstructorUtilsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ConstructorUtils#getImmutableTypes()}.
      */
+
+    @Test
     public void testGetImmutableTypes() {
         Set<Class<?>> s = ConstructorUtils.getImmutableTypes();
         assertNotNull(s);
@@ -177,6 +197,8 @@ public class ConstructorUtilsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ConstructorUtils#getPrimitiveToWrapper()}.
      */
+
+    @Test
     public void testGetPrimitiveToWrapper() {
         Map<Class<?>, Class<?>> m = ConstructorUtils.getPrimitiveToWrapper();
         assertNotNull(m);
@@ -186,6 +208,8 @@ public class ConstructorUtilsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ConstructorUtils#getPrimitiveDefaults()}.
      */
+
+    @Test
     public void testGetPrimitiveDefaults() {
         Map<Class<?>, Object> m = ConstructorUtils.getPrimitiveDefaults();
         assertNotNull(m);
@@ -195,6 +219,8 @@ public class ConstructorUtilsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ConstructorUtils#isClassSimple(java.lang.Class)}.
      */
+
+    @Test
     public void testIsClassSimple() {
         assertTrue( ConstructorUtils.isClassSimple(int.class) );
         assertTrue( ConstructorUtils.isClassSimple(String.class) );
@@ -210,6 +236,8 @@ public class ConstructorUtilsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ConstructorUtils#getWrapperToPrimitive()}.
      */
+
+    @Test
     public void testGetWrapperToPrimitive() {
         Map<Class<?>, Class<?>> m = ConstructorUtils.getWrapperToPrimitive();
         assertNotNull(m);
@@ -219,6 +247,8 @@ public class ConstructorUtilsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ConstructorUtils#getWrapper(java.lang.Class)}.
      */
+
+    @Test
     public void testGetWrapper() {
         assertEquals(Integer.class, ConstructorUtils.getWrapper(int.class));
         assertEquals(Integer.class, ConstructorUtils.getWrapper(Integer.class));
@@ -233,6 +263,8 @@ public class ConstructorUtilsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ConstructorUtils#classEquals(java.lang.Class, java.lang.Class)}.
      */
+
+    @Test
     public void testClassEquals() {
         assertTrue( ConstructorUtils.classEquals(int.class, int.class) );
         assertTrue( ConstructorUtils.classEquals(Integer.class, Integer.class) );
@@ -260,6 +292,8 @@ public class ConstructorUtilsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ConstructorUtils#classAssignable(java.lang.Class, java.lang.Class)}.
      */
+
+    @Test
     public void testClassAssignable() {
         assertTrue( ConstructorUtils.classAssignable(int.class, int.class) );
         assertTrue( ConstructorUtils.classAssignable(Integer.class, Integer.class) );
@@ -296,6 +330,8 @@ public class ConstructorUtilsTest extends TestCase {
      * Test method for {@link org.azeckoski.reflectutils.ConstructorUtils#constructClass(java.lang.Class)}.
      */
     @SuppressWarnings("unchecked")
+
+    @Test
     public void testConstructClassClassOfT() {
         ConstructorUtils constructUtils = new ConstructorUtils();
 
@@ -363,6 +399,8 @@ public class ConstructorUtilsTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ConstructorUtils#constructClass(java.lang.Class, java.lang.Object[])}.
      */
+
+    @Test
     public void testConstructClassClassOfTObjectArray() {
         ConstructorUtils constructUtils = new ConstructorUtils();
 
@@ -389,6 +427,10 @@ public class ConstructorUtilsTest extends TestCase {
         }
     }
 
+
+    @Test
+
+
     public void testConstructNoPublic() {
         ConstructorUtils constructUtils = new ConstructorUtils();
 
@@ -396,6 +438,10 @@ public class ConstructorUtilsTest extends TestCase {
         assertNotNull(t1);
         assertEquals("prot", t1.getConstructed());
     }
+
+
+    @Test
+
 
     public void testSpecialCheck() {
         assertTrue( ConstructorUtils.isClassSpecial(Class.class) );

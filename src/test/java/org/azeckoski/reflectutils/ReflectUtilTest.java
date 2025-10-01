@@ -14,7 +14,9 @@
 
 package org.azeckoski.reflectutils;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 import org.azeckoski.reflectutils.annotations.TestAnnote;
 import org.azeckoski.reflectutils.classes.*;
 import org.azeckoski.reflectutils.exceptions.FieldnameNotFoundException;
@@ -29,12 +31,14 @@ import java.util.*;
  * 
  * @author Aaron Zeckoski (azeckoski@gmail.com)
  */
-public class ReflectUtilTest extends TestCase {
+public class ReflectUtilTest {
 
     /**
      * Test method for {@link org.sakaiproject.ReflectUtils.util.reflect.ReflectUtil#getFieldValue(java.lang.Object, java.lang.String)}.
      */
     @SuppressWarnings("unchecked")
+
+    @Test
     public void testGetFieldValueObjectString() {
         ReflectUtils reflectUtil = new ReflectUtils();
         Object value = null;
@@ -47,7 +51,7 @@ public class ReflectUtilTest extends TestCase {
 
         value = reflectUtil.getFieldValue( thing, "id");
         assertNotNull(value);
-        assertEquals(new Long(3), value);
+        assertEquals(Long.valueOf(3), value);
 
         TestNesting nested = new TestNesting(10, "100", new String[] {"A", "B"});
         value = reflectUtil.getFieldValue( nested, "id");
@@ -56,7 +60,7 @@ public class ReflectUtilTest extends TestCase {
 
         value = reflectUtil.getFieldValue( nested, "testEntity.id");
         assertNotNull(value);
-        assertEquals(new Long(3), value);
+        assertEquals(Long.valueOf(3), value);
 
         value = reflectUtil.getFieldValue( nested, "testBean");
         assertNull(value);
@@ -108,7 +112,7 @@ public class ReflectUtilTest extends TestCase {
         assertEquals(5, value);
 
         value = reflectUtil.getFieldValue(ultra, "testNesting.testEntity.id");
-        assertEquals(new Long(3), value);
+        assertEquals(Long.valueOf(3), value);
 
         value = reflectUtil.getFieldValue(ultra, "testNesting.sList[0]");
         assertEquals("A", value);
@@ -137,6 +141,8 @@ public class ReflectUtilTest extends TestCase {
     /**
      * Test method for {@link org.azeckoski.reflectutils.ReflectUtils#getFieldValueAsString(java.lang.Object, java.lang.String, java.lang.Class)}.
      */
+
+    @Test
     public void testGetFieldValueAsString() {
         ReflectUtils reflectUtil = new ReflectUtils();
         String value = null;
@@ -167,6 +173,8 @@ public class ReflectUtilTest extends TestCase {
     /**
      * Test method for {@link org.sakaiproject.ReflectUtils.util.reflect.ReflectUtil#setFieldValue(java.lang.Object, java.lang.String, java.lang.Object)}.
      */
+
+    @Test
     public void testSetFieldValue() {
         ReflectUtils reflectUtil = new ReflectUtils();
         Object thing = null;
@@ -256,8 +264,8 @@ public class ReflectUtilTest extends TestCase {
         reflectUtil.setFieldValue(ultra, "testNesting.id", 20);
         assertEquals(20, ultra.getTestNesting().getId());
 
-        reflectUtil.setFieldValue(ultra, "testNesting.testEntity.id", new Long(6));
-        assertEquals(new Long(6), ultra.getTestNesting().getTestEntity().getId());
+        reflectUtil.setFieldValue(ultra, "testNesting.testEntity.id", Long.valueOf(6));
+        assertEquals(Long.valueOf(6), ultra.getTestNesting().getTestEntity().getId());
 
         reflectUtil.setFieldValue(ultra, "testNesting.sList[0]", "AAA");
         assertEquals("AAA", ultra.getTestNesting().getSList().get(0));
@@ -280,6 +288,8 @@ public class ReflectUtilTest extends TestCase {
     /**
      * Test method for {@link org.sakaiproject.ReflectUtils.util.reflect.ReflectUtil#setFieldStringValue(java.lang.Object, java.lang.String, java.lang.String)}.
      */
+
+    @Test
     public void testSetFieldStringValue() {
         ReflectUtils reflectUtil = new ReflectUtils();
         Object thing = null;
@@ -294,7 +304,7 @@ public class ReflectUtilTest extends TestCase {
 
         thing = new TestEntity();
         reflectUtil.setFieldValue(thing, "id", "6");
-        assertEquals(new Long(6), ((TestEntity)thing).getId());
+        assertEquals(Long.valueOf(6), ((TestEntity)thing).getId());
 
         thing = new TestEntity();
         reflectUtil.setFieldValue(thing, "sArray", "A, B, C");
@@ -304,21 +314,25 @@ public class ReflectUtilTest extends TestCase {
         assertEquals("C", ((TestEntity)thing).getSArray()[2]);
     }
 
+
+    @Test
+
+
     public void testSetFieldValueWithConversion() {
         ReflectUtils reflectUtil = new ReflectUtils();
         Object thing = null;
 
         thing = new TestEntity();
         reflectUtil.setFieldValue(thing, "id", "10", true);
-        assertEquals(new Long(10), ((TestEntity)thing).getId());
+        assertEquals(Long.valueOf(10), ((TestEntity)thing).getId());
 
         thing = new TestEntity();
         reflectUtil.setFieldValue(thing, "id", 10, true);
-        assertEquals(new Long(10), ((TestEntity)thing).getId());
+        assertEquals(Long.valueOf(10), ((TestEntity)thing).getId());
 
         thing = new TestEntity();
         reflectUtil.setFieldValue(thing, "id", new String[] {"10"}, true);
-        assertEquals(new Long(10), ((TestEntity)thing).getId());
+        assertEquals(Long.valueOf(10), ((TestEntity)thing).getId());
 
         thing = new TestEntity();
         reflectUtil.setFieldValue(thing, "bool", true, true);
@@ -362,6 +376,8 @@ public class ReflectUtilTest extends TestCase {
      * Test method for {@link org.azeckoski.reflectutils.ReflectUtils#constructClass(java.lang.Class)}.
      */
     @SuppressWarnings("unchecked")
+
+    @Test
     public void testConstructClass() {
         ReflectUtils reflectUtil = new ReflectUtils();
 
@@ -426,17 +442,23 @@ public class ReflectUtilTest extends TestCase {
         }
     }
 
+
+    @Test
+
+
     public void testConvert() {
         ReflectUtils reflectUtil = new ReflectUtils();
 
         assertEquals(123, (int) reflectUtil.convert("123", int.class) );
         assertEquals("123", reflectUtil.convert("123", String.class) );
-        assertEquals(new Integer(123), reflectUtil.convert("123", Integer.class) );
+        assertEquals(Integer.valueOf(123), reflectUtil.convert("123", Integer.class) );
     }
 
     /**
      * Test method for {@link org.azeckoski.reflectutils.ReflectUtils#pdNameCompare(java.lang.String, java.lang.String)}.
      */
+
+    @Test
     public void testPdNameCompare() {
         assertFalse( ReflectUtils.pdNameCompare(null, "") );
         assertFalse( ReflectUtils.pdNameCompare("", "") );
@@ -452,6 +474,8 @@ public class ReflectUtilTest extends TestCase {
     /**
      * Test method for {@link org.sakaiproject.ReflectUtils.util.reflect.ReflectUtil#getFieldTypes()}.
      */
+
+    @Test
     public void testGetFieldTypes() {
         ReflectUtils reflectUtil = new ReflectUtils();
         Map<String, Class<?>> types;
@@ -466,6 +490,8 @@ public class ReflectUtilTest extends TestCase {
     /**
      * Test method for {@link org.sakaiproject.ReflectUtils.util.reflect.ReflectUtil#getFieldType(java.lang.Class, java.lang.String)}.
      */
+
+    @Test
     public void testGetFieldType() {
         ReflectUtils reflectUtil = new ReflectUtils();
         Class<?> type;
@@ -494,6 +520,8 @@ public class ReflectUtilTest extends TestCase {
     /**
      * Test method for {@link org.sakaiproject.ReflectUtils.util.reflect.ReflectUtil#getObjectValues(java.lang.Object)}.
      */
+
+    @Test
     public void testGetObjectValues() {
         Map<String, Object> m = null;
         ReflectUtils reflectUtil = new ReflectUtils();
@@ -527,7 +555,7 @@ public class ReflectUtilTest extends TestCase {
         assertTrue(m.containsKey("sArray"));
         assertTrue(m.containsKey("bool"));
         assertTrue(m.containsKey("prefix"));
-        assertEquals(new Long(3), m.get("id"));
+        assertEquals(Long.valueOf(3), m.get("id"));
         assertEquals("33", m.get("entityId"));
         assertEquals(null, m.get("extra"));
         assertEquals("crud", m.get("prefix"));
@@ -537,6 +565,8 @@ public class ReflectUtilTest extends TestCase {
     /**
      * Test method for {@link org.sakaiproject.ReflectUtils.util.reflect.ReflectUtil#getFieldNameWithAnnotation(java.lang.Class, java.lang.Class)}.
      */
+
+    @Test
     public void testGetFieldNameWithAnnotation() {
         ReflectUtils reflectUtil = new ReflectUtils();
         String fieldName = null;
@@ -551,6 +581,8 @@ public class ReflectUtilTest extends TestCase {
     /**
      * Test method for {@link org.sakaiproject.ReflectUtils.util.reflect.ReflectUtil#getFieldValueAsString(java.lang.Object, java.lang.String, java.lang.Class)}.
      */
+
+    @Test
     public void testGetFieldValueObjectStringClassOfQextendsAnnotation() {
         String value = null;
         ReflectUtils reflectUtil = new ReflectUtils();
@@ -593,6 +625,8 @@ public class ReflectUtilTest extends TestCase {
     /**
      * Test method for {@link org.sakaiproject.ReflectUtils.util.reflect.ReflectUtil#deepClone(java.lang.Object, int, java.lang.String[])}.
      */
+
+    @Test
     public void testClone() {
         ReflectUtils reflectUtil = new ReflectUtils();
 
@@ -626,6 +660,8 @@ public class ReflectUtilTest extends TestCase {
     /**
      * Test method for {@link org.sakaiproject.ReflectUtils.util.reflect.ReflectUtil#deepCopy(java.lang.Object, java.lang.Object, int, java.lang.String[], boolean)}.
      */
+
+    @Test
     public void testCopy() {
         ReflectUtils reflectUtil = new ReflectUtils();
 
@@ -652,6 +688,10 @@ public class ReflectUtilTest extends TestCase {
         assertEquals(orig.getMyInt(), dest.getMyInt());
         assertEquals(orig.getMyString(), dest.getMyString());
     }
+
+
+    @Test
+
 
     public void testSimpleCopy() {
         ReflectUtils reflectUtil = new ReflectUtils();
@@ -692,6 +732,10 @@ public class ReflectUtilTest extends TestCase {
         assertEquals("B", array[1]);
         assertEquals("C", array[2]);
     }
+
+
+    @Test
+
 
     public void testPopulate() {
         ReflectUtils reflectUtil = new ReflectUtils();
@@ -738,7 +782,7 @@ public class ReflectUtilTest extends TestCase {
         assertEquals("OLD,BLUE", target.getMyString());
 
         // objects
-        properties.put("myInt", new Long(222));
+        properties.put("myInt", Long.valueOf(222));
         properties.put("myString", 55555);
         results = reflectUtil.populate(target, properties);
         assertNotNull(results);
@@ -747,6 +791,10 @@ public class ReflectUtilTest extends TestCase {
         assertEquals(222, target.getMyInt());
         assertEquals("55555", target.getMyString());
     }
+
+
+    @Test
+
 
     public void testPopulateFromParams() {
         ReflectUtils reflectUtil = new ReflectUtils();
@@ -762,13 +810,17 @@ public class ReflectUtilTest extends TestCase {
         assertNotNull(results);
         assertEquals(3, results.size());
         assertNotNull(target);
-        assertEquals(new Long(1000), target.getId());
+        assertEquals(Long.valueOf(1000), target.getId());
         assertEquals("OLD", target.getExtra());
         assertEquals("33", target.getEntityId());
         assertEquals(null, target.getBool());
         assertEquals(3, target.getSArray().length);
 
     }
+
+
+    @Test
+
 
     public void testPopulateFromParamsDates() {
         ReflectUtils reflectUtil = new ReflectUtils();
@@ -800,6 +852,8 @@ public class ReflectUtilTest extends TestCase {
     /**
      * Test method for {@link org.sakaiproject.ReflectUtils.util.reflect.ReflectUtil#makeFieldNameFromMethod(java.lang.String)}.
      */
+
+    @Test
     public void testMakeFieldNameFromMethod() {
         String name = null;
 
@@ -822,6 +876,8 @@ public class ReflectUtilTest extends TestCase {
     /**
      * Test method for {@link org.sakaiproject.ReflectUtils.util.reflect.ReflectUtil#getSuperclasses(java.lang.Class)}.
      */
+
+    @Test
     public void testGetSuperclasses() {
         List<Class<?>> superClasses = null;
 
@@ -853,6 +909,8 @@ public class ReflectUtilTest extends TestCase {
      * Test method for {@link org.sakaiproject.ReflectUtils.util.reflect.ReflectUtil#getClassFromCollection(java.util.Collection)}.
      */
     @SuppressWarnings("unchecked")
+
+    @Test
     public void testGetClassFromCollection() {
         Class<?> result = null;
 
@@ -876,13 +934,13 @@ public class ReflectUtilTest extends TestCase {
         assertEquals(String.class, result);
 
         HashSet<Object> s = new HashSet<Object>();
-        s.add(new Double(22.0));
+        s.add(Double.valueOf(22.0));
         result = ReflectUtils.getClassFromCollection(s);
         assertNotNull(result);
         assertEquals(Double.class, result);
 
         List v = new Vector<Object>();
-        v.add( new Integer(30) );
+        v.add( Integer.valueOf(30) );
         result = ReflectUtils.getClassFromCollection(v);
         assertNotNull(result);
         assertEquals(Integer.class, result);
@@ -891,6 +949,8 @@ public class ReflectUtilTest extends TestCase {
     /**
      * Test method for {@link org.sakaiproject.ReflectUtils.util.reflect.ReflectUtil#contains(T[], java.lang.Object)}.
      */
+
+    @Test
     public void testContains() {
         assertFalse( ReflectUtils.contains(new String[] {}, "stuff") );
         assertFalse( ReflectUtils.contains(new String[] {"apple"}, "stuff") );
@@ -901,6 +961,8 @@ public class ReflectUtilTest extends TestCase {
     /**
      * Test method for {@link org.sakaiproject.ReflectUtils.util.reflect.ReflectUtil#capitalize(java.lang.String)}.
      */
+
+    @Test
     public void testCapitalize() {
         assertTrue( ReflectUtils.capitalize("lower").equals("Lower") );
         assertTrue( ReflectUtils.capitalize("UPPER").equals("UPPER") );
@@ -913,6 +975,8 @@ public class ReflectUtilTest extends TestCase {
     /**
      * Test method for {@link org.sakaiproject.ReflectUtils.util.reflect.ReflectUtil#unCapitalize(java.lang.String)}.
      */
+
+    @Test
     public void testUnCapitalize() {
         assertTrue( ReflectUtils.unCapitalize("lower").equals("lower") );
         assertTrue( ReflectUtils.unCapitalize("UPPER").equals("uPPER") );
@@ -923,6 +987,8 @@ public class ReflectUtilTest extends TestCase {
     }
 
     @SuppressWarnings("unchecked")
+
+    @Test
     public void testObjectToMap() {
         ReflectUtils reflectUtil = new ReflectUtils();
         Map<String,Object> map = null;
@@ -959,7 +1025,7 @@ public class ReflectUtilTest extends TestCase {
         // get non-null object data
         m = (Map<String, Object>) map.get("testEntity"); 
         assertNotNull(m);
-        assertEquals(new Long(3), m.get("id"));
+        assertEquals(Long.valueOf(3), m.get("id"));
         assertEquals("33", m.get("entityId"));
         assertTrue(m.containsKey("extra"));
         assertEquals(null, m.get("extra")); // null
@@ -999,7 +1065,7 @@ public class ReflectUtilTest extends TestCase {
         // get non-null object data
         m = (Map<String, Object>) map.get("testEntity"); 
         assertNotNull(m);
-        assertEquals(new Long(3), m.get("id"));
+        assertEquals(Long.valueOf(3), m.get("id"));
         assertEquals("33", m.get("entityId"));
         assertFalse(m.containsKey("extra"));
         assertEquals(null, m.get("extra")); // null

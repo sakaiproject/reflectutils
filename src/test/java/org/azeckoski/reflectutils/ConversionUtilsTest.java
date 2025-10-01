@@ -26,8 +26,9 @@ import java.util.Set;
 import org.azeckoski.reflectutils.classes.TestBean;
 import org.azeckoski.reflectutils.classes.TestPea;
 import org.azeckoski.reflectutils.map.ArrayOrderedMap;
+import org.junit.jupiter.api.Test;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 /**
@@ -35,8 +36,9 @@ import junit.framework.TestCase;
  * 
  * @author Aaron Zeckoski (azeckoski @ gmail.com)
  */
-public class ConversionUtilsTest extends TestCase {
+public class ConversionUtilsTest {
 
+    @Test
     @SuppressWarnings("unchecked")
     public void testConvertObject() {
         ConversionUtils convertUtils = new ConversionUtils();
@@ -45,18 +47,18 @@ public class ConversionUtilsTest extends TestCase {
 
         // equivalent conversion also should be instantaneous since no conversion happens
         assertEquals(123, (int) convertUtils.convert(123, int.class) );
-        assertEquals(123, (int) convertUtils.convert(new Integer(123), int.class) );
+        assertEquals(123, (int) convertUtils.convert(Integer.valueOf(123), int.class) );
         assertEquals("123", convertUtils.convert("123", String.class) );
         assertEquals(abc, convertUtils.convert(abc, String[].class) );
 
         // object conversion should be instant
-        assertEquals(new Integer(123), (Integer) convertUtils.convert(123, Object.class) );
+        assertEquals(Integer.valueOf(123), (Integer) convertUtils.convert(123, Object.class) );
         assertEquals("123", convertUtils.convert("123", Object.class) );
 
         // now do actual conversions
         assertEquals(123, (int) convertUtils.convert("123", int.class) );
         assertEquals("123", convertUtils.convert("123", String.class) );
-        assertEquals(new Integer(123), convertUtils.convert("123", Integer.class) );
+        assertEquals(Integer.valueOf(123), convertUtils.convert("123", Integer.class) );
 
         // array to scalar
         assertEquals(123, (int) convertUtils.convert(new int[] {123,456}, int.class) );
@@ -101,6 +103,7 @@ public class ConversionUtilsTest extends TestCase {
         assertEquals(3, map.size());
     }
 
+    @Test
     public void testStringToArray() {
         ConversionUtils convertUtils = new ConversionUtils();
 
@@ -124,6 +127,7 @@ public class ConversionUtilsTest extends TestCase {
 
     }
     
+    @Test
     public void testConvertDates() {
         ConversionUtils convertUtils = new ConversionUtils();
 
@@ -142,6 +146,7 @@ public class ConversionUtilsTest extends TestCase {
         assertEquals(calendar, convertUtils.convert("19751029", Calendar.class));
     }
 
+    @Test
     public void testConvertToString() {
         ConversionUtils convertUtils = new ConversionUtils();
 
@@ -151,17 +156,19 @@ public class ConversionUtilsTest extends TestCase {
         
     }
 
+    @Test
     public void testConvertString() {
         ConversionUtils convertUtils = new ConversionUtils();
 
         assertEquals(3, convertUtils.convertString("3", int.class));
-        assertEquals(new Integer(3), convertUtils.convertString("3", Integer.class));
+        assertEquals(Integer.valueOf(3), convertUtils.convertString("3", Integer.class));
         int[] intArray = (int[]) convertUtils.convertString("3", int[].class);
         assertEquals(3, intArray[0]);
         assertEquals("XXX", convertUtils.convertString("XXX", Integer.class));
     }
 
     private enum TestEnum {ONE, TWO, THREE};
+    @Test
     public void testConvertEnums() {
         ConversionUtils convertUtils = new ConversionUtils();
 
@@ -179,6 +186,7 @@ public class ConversionUtilsTest extends TestCase {
     }
 
     @SuppressWarnings("unchecked")
+    @Test
     public void testObjectToMap() { // simple conversion
         ConversionUtils convertUtils = new ConversionUtils();
 
@@ -197,6 +205,7 @@ public class ConversionUtilsTest extends TestCase {
         assertEquals("woot", m1.get("myString"));
     }
 
+    @Test
     public void testMapToObject() { // simple conversion
         ConversionUtils convertUtils = new ConversionUtils();
 
@@ -222,6 +231,7 @@ public class ConversionUtilsTest extends TestCase {
     }
 
     @SuppressWarnings("unchecked")
+    @Test
     public void testConvertMaps() {
         ConversionUtils convertUtils = new ConversionUtils();
 

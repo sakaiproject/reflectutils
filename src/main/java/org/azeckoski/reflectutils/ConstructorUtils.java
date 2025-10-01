@@ -640,10 +640,19 @@ public class ConstructorUtils {
             }
         }
         if (newC == null) {
+            Exception fallbackFailure = null;
             try {
-                // this should work 99% of the time
-                newC = (T) type.newInstance();
-            } catch (Exception e) {
+                Constructor<T> declaredConstructor = type.getDeclaredConstructor();
+                if (!declaredConstructor.canAccess(null)) {
+                    declaredConstructor.setAccessible(true);
+                }
+                newC = declaredConstructor.newInstance();
+            } catch (NoSuchMethodException ignored) {
+                // continue to constructor iteration below
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                fallbackFailure = e;
+            }
+            if (newC == null) {
                 // now we will try to use the various constructors by giving them null values to construct the object
                 List<Constructor<T>> constructors = null;
                 if ( ConstructorUtils.isClassBean(type) ) {
@@ -661,24 +670,24 @@ public class ConstructorUtils {
                 for (Constructor<T> constructor : constructors) {
                     Object[] params = new Object[ constructor.getParameterTypes().length ];
                     try {
-                        newC = (T) constructor.newInstance(params);
+                        if (!constructor.canAccess(null)) {
+                            constructor.setAccessible(true);
+                        }
+                        newC = constructor.newInstance(params);
                         break;
-                    } catch (IllegalArgumentException e1) {
-                        // oh well
-                    } catch (InstantiationException e1) {
-                        // tough cookies
-                    } catch (IllegalAccessException e1) {
-                        // them's the breaks
-                    } catch (InvocationTargetException e1) {
-                        // life's tough
-                    } catch (ExceptionInInitializerError e1) {
-                        // meh
+                    } catch (IllegalArgumentException | InstantiationException | IllegalAccessException |
+                             InvocationTargetException | ExceptionInInitializerError e1) {
+                        // ignore and continue
+                        if (fallbackFailure == null) {
+                            fallbackFailure = e1;
+                        }
                     }
-                    // ignore any exceptions and keep trying
                 }
                 if (newC == null) {
-                    // all attempts failed
-                    throw new IllegalArgumentException("Could not construct object for class (" + type.getName() + ") using newInstance or using any of the constructors: " + e.getMessage(), e);
+                    if (fallbackFailure == null) {
+                        fallbackFailure = new IllegalArgumentException("No accessible constructors found for class " + type.getName());
+                    }
+                    throw new IllegalArgumentException("Could not construct object for class (" + type.getName() + ")", fallbackFailure);
                 }
             }
         }
