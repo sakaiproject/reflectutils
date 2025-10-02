@@ -18,6 +18,7 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +26,6 @@ import java.util.Set;
 
 import org.azeckoski.reflectutils.classes.TestBean;
 import org.azeckoski.reflectutils.classes.TestPea;
-import org.azeckoski.reflectutils.map.ArrayOrderedMap;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -240,9 +240,10 @@ public class ConversionUtilsTest {
         sm.put("B", "BZ");
         sm.put("C", "CZ");
 
-        Map<String, String> aom = convertUtils.convert(sm, ArrayOrderedMap.class);
+        Map<String, String> aom = convertUtils.convert(sm, LinkedHashMap.class);
         assertNotNull(aom);
-        
+        assertEquals(3, aom.size());
+        assertEquals("AZ", aom.get("A"));
     }
 
 }

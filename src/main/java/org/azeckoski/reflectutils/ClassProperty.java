@@ -20,12 +20,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.azeckoski.reflectutils.annotations.ReflectTransient;
-import org.azeckoski.reflectutils.map.ArrayOrderedMap;
-import org.azeckoski.reflectutils.map.OrderedMap;
 
 
 /**
@@ -56,11 +55,11 @@ public class ClassProperty {
     protected boolean indexed = false;
     protected boolean arrayed = false;
 
-    private OrderedMap<Class<? extends Annotation>, Annotation> propertyAnnotations; // contains all annotations on this property
+    private Map<Class<? extends Annotation>, Annotation> propertyAnnotations; // contains all annotations on this property
     protected void addAnnotation(Annotation annotation) {
         if (annotation != null) {
             if (propertyAnnotations == null) {
-                propertyAnnotations = new ArrayOrderedMap<Class<? extends Annotation>, Annotation>();
+                propertyAnnotations = new LinkedHashMap<Class<? extends Annotation>, Annotation>();
             }
             Class<? extends Annotation> c = annotation.annotationType();
             if (! propertyAnnotations.containsKey(c)) {

@@ -19,6 +19,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,7 +36,6 @@ import org.azeckoski.reflectutils.classes.TestEntity;
 import org.azeckoski.reflectutils.classes.TestNesting;
 import org.azeckoski.reflectutils.classes.TestPea;
 import org.azeckoski.reflectutils.classes.TestUltraNested;
-import org.azeckoski.reflectutils.map.ArrayOrderedMap;
 
 /**
  * Testing the deep utils
@@ -452,7 +452,7 @@ public class DeepUtilsTest {
     public void testPopulateFromNestedMap() {
         DeepUtils deepUtils = new DeepUtils();
 
-        Map<String, Object> m = new ArrayOrderedMap<String, Object>();
+        Map<String, Object> m = new LinkedHashMap<String, Object>();
         m.put("A", "AZ");
         m.put("id", "999");
         m.put("entityId", "AZ");

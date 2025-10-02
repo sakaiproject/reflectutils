@@ -16,13 +16,13 @@ package org.azeckoski.reflectutils.converters;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.azeckoski.reflectutils.ConstructorUtils;
 import org.azeckoski.reflectutils.FieldUtils;
 import org.azeckoski.reflectutils.ClassFields.FieldsFilter;
 import org.azeckoski.reflectutils.converters.api.InterfaceConverter;
-import org.azeckoski.reflectutils.map.ArrayOrderedMap;
 
 
 /**
@@ -35,7 +35,7 @@ import org.azeckoski.reflectutils.map.ArrayOrderedMap;
 public class MapConverter implements InterfaceConverter<Map> {
 
     public Map convert(Object value) {
-        return convertInterface(value, ArrayOrderedMap.class);
+        return convertInterface(value, LinkedHashMap.class);
     }
 
     protected ConstructorUtils getConstructorUtils() {
@@ -51,7 +51,7 @@ public class MapConverter implements InterfaceConverter<Map> {
         Class<?> fromType = value.getClass();
         Object toConvert = value;
         if (implementationType == null || implementationType.isInterface()) {
-            implementationType = ArrayOrderedMap.class;
+            implementationType = LinkedHashMap.class;
         }
         convert = (Map<String, Object>) getConstructorUtils().constructClass(implementationType);
         if ( ConstructorUtils.isClassArray(fromType) ) {

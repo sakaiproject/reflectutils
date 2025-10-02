@@ -695,8 +695,6 @@ public class ReflectUtils {
     // STATIC access
 
     protected static SoftReference<ReflectUtils> instanceStorage;
-    //    protected static Map<ClassLoader, ReflectUtil> utilByClassLoader = 
-    //        new ReferenceMap<ClassLoader, ReflectUtil>(ReferenceType.WEAK, ReferenceType.STRONG);
     /**
      * Get a singleton instance of this class to work with (stored statically) <br/>
      * <b>WARNING</b>: do not hold onto this object or cache it yourself, call this method again if you need it again

@@ -34,6 +34,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,9 +43,6 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.Vector;
-
-import org.azeckoski.reflectutils.map.ArrayOrderedMap;
 
 /**
  * Class which provides methods for dealing with class constructors,
@@ -332,7 +331,7 @@ public class ConstructorUtils {
 
     /**
      * @param type any class
-     * @return true if this class is a collection (e.g. {@link Collection}, {@link HashSet}, {@link Vector})
+     * @return true if this class is a collection (e.g. {@link Collection}, {@link HashSet}, {@link ArrayList})
      */
     public static boolean isClassCollection(Class<?> type) {
         checkNull(type);
@@ -440,14 +439,13 @@ public class ConstructorUtils {
             } else if (SortedMap.class.isAssignableFrom(type)) {
                 toType = (Class<T>) TreeMap.class;
             } else if ( isClassList(type) ) {
-                // we use the thread safe version of list by default
-                toType = (Class<T>) Vector.class;
+                toType = (Class<T>) ArrayList.class;
             } else if (Set.class.isAssignableFrom(type)) {
-                toType = (Class<T>) HashSet.class;
+                toType = (Class<T>) LinkedHashSet.class;
             } else if ( isClassMap(type) ) {
-                toType = (Class<T>) ArrayOrderedMap.class;
+                toType = (Class<T>) LinkedHashMap.class;
             } else if ( isClassCollection(type) ) {
-                toType = (Class<T>) Vector.class;
+                toType = (Class<T>) ArrayList.class;
             // Serializable should stay at the end
             } else if (Serializable.class.isAssignableFrom(type)) {
                 // if it is serializable then it is probably a string right?
@@ -640,7 +638,7 @@ public class ConstructorUtils {
             }
         }
         if (newC == null) {
-            Exception fallbackFailure = null;
+            Throwable fallbackFailure = null;
             try {
                 Constructor<T> declaredConstructor = type.getDeclaredConstructor();
                 if (!declaredConstructor.canAccess(null)) {

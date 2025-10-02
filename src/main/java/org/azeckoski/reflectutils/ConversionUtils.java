@@ -23,9 +23,9 @@ import java.net.URL;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 import java.util.Map.Entry;
 
 import org.azeckoski.reflectutils.converters.ArrayConverter;
@@ -56,8 +56,8 @@ import org.azeckoski.reflectutils.converters.URLConverter;
 import org.azeckoski.reflectutils.converters.api.Converter;
 import org.azeckoski.reflectutils.converters.api.InterfaceConverter;
 import org.azeckoski.reflectutils.converters.api.VariableConverter;
-import org.azeckoski.reflectutils.refmap.ReferenceMap;
-import org.azeckoski.reflectutils.refmap.ReferenceType;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Class which provides methods for converting between object types,
@@ -116,7 +116,7 @@ public class ConversionUtils {
      */
     protected void loadDefaultConverters() {
         if (converters == null) {
-            converters = new ReferenceMap<Class<?>, Converter<?>>(ReferenceType.WEAK, ReferenceType.STRONG);
+            converters = new ConcurrentHashMap<Class<?>, Converter<?>>();
         } else {
             converters.clear();
         }
@@ -183,7 +183,7 @@ public class ConversionUtils {
 
     protected void loadDefaultVariableConverters() {
         if (variableConverters == null) {
-            variableConverters = new Vector<VariableConverter>();
+            variableConverters = new ArrayList<VariableConverter>();
         } else {
             clearVariableConverters();
         }

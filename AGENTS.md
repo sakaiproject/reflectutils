@@ -1,31 +1,30 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-- `src/main/java/org/azeckoski/reflectutils/` contains the core reflection utilities; subpackages such as `converters`, `transcoders`, `beanutils`, and `map` group related helpers—add new utilities within these logical boundaries.
-- `src/test/java/...` mirrors the production tree with fixture beans under `classes` and annotation stubs under `annotations`; reuse these helpers instead of creating ad-hoc test data.
-- `src/main/java/overview.html` and the package-level `package.html` files drive the published Javadoc overview—update them whenever you expose new public APIs.
-- `target/` holds compiled artifacts and reports; run `mvn clean` before committing so the directory stays out of version control.
+- `src/main/java/org/azeckoski/reflectutils/` hosts the runtime code; key subpackages include `converters`, `transcoders` (Jackson-backed JSON/XML support), `annotations`, and `interfaces`.
+- Caching and core helpers live alongside the public APIs; caches prefer `WeakHashMap`/`ConcurrentHashMap` implementations—new utilities should follow this pattern.
+- Tests under `src/test/java` mirror the production layout; reuse fixtures in `classes` rather than inventing bespoke beans.
+- Build outputs land in `target/`; always run `mvn clean` before committing to avoid stray artifacts.
 
 ## Build, Test, and Development Commands
-- `mvn clean install` compiles against Java 1.5 bytecode, executes unit tests, and produces the jar in `target/reflectutils-*.jar`.
-- `mvn test` is the fastest feedback loop and respects the Surefire include pattern `**/*Test.java`.
-- `mvn site` or `mvn cobertura:cobertura` regenerate quality reports (PMD, Cobertura, JDepend, JXR) into `target/site/`.
-- `mvn -Prelease deploy` signs and stages artifacts to OSSRH; verify `settings.xml` credentials before invoking it.
+- `mvn clean verify` compiles against JDK 21, runs the JUnit 5 suite, and produces coverage via JaCoCo.
+- `mvn -DskipTests package` is handy for packaging when tests are covered elsewhere.
+- `mvn -P release deploy` signs and stages artifacts to OSSRH; ensure credentials exist in `~/.m2/settings.xml`.
 
 ## Coding Style & Naming Conventions
-- Use 4-space indentation with braces on the same line as declarations, matching existing classes like `ReflectUtils`.
-- Preserve Java 1.5 compatibility: avoid streams, lambdas, and newer collection APIs; prefer explicit generics and iterator loops.
-- Public APIs live under `org.azeckoski.reflectutils`; name new subpackages with a single descriptive noun (e.g., `metrics`, `cache`).
-- Source files are encoded in UTF-8; keep imports explicit and group static imports below regular imports.
+- Use 4-space indentation with braces on the same line; prefer explicit types over `var` unless readability improves.
+- Embrace modern Java 21 features (records, pattern matching) when they simplify code, but keep APIs source-compatibility friendly.
+- New subpackages should have concise, descriptive names (e.g., `cache`, `transcoders.jackson`).
+- Source files are UTF-8; group imports by domain and keep static imports separate.
 
 ## Testing Guidelines
-- Tests extend JUnit 3 `TestCase`; name files `SomethingTest.java` so Maven Surefire picks them up.
-- Place reusable fixtures under `src/test/java/org/azeckoski/reflectutils/classes` and shared annotations under `.../annotations`.
-- Aim to cover new converter paths and transcoder branches; review `target/site/cobertura/index.html` after coverage runs.
-- When reproducing bugs, add a new `*Test` that fails before your fix and passes afterward.
+- Tests are JUnit 5 (`@Test`), using `org.junit.jupiter.api.Assertions` statics.
+- For JSON/XML scenarios, assert using decoded `Map<String,Object>` representations rather than string equality.
+- Favor focused unit tests over giant integration fixtures; extend or reuse helpers in `classes` and `annotations`.
+- Run `mvn clean verify` before opening a PR; capture any CI-specific flakes in the PR description.
 
 ## Commit & Pull Request Guidelines
-- Keep commit messages short and imperative, mirroring existing history (`Fixed release plugin values`); include tags like `[maven-release-plugin]` only when running automated tools.
-- Reference issues in branch names or PR titles (`issue-2` style) and describe both the problem and solution in the PR body.
-- Confirm `mvn clean install` passes locally, note any skipped tests, and avoid committing artifacts from `target/`.
-- For functional changes, call out API or serialization impacts and attach logs or sample payloads when they help reviewers.
+- Write imperative, scoped commit messages (e.g., `Replace beanutils cache with WeakHashMap`).
+- Reference GitHub issues in branch names or PR titles (e.g., `modernize/jdk21-cache`).
+- Document behavior or API changes in the PR body; include sample payloads when serializer output changes.
+- Keep `target/` and other build outputs out of commits; prefer smaller PRs that are easy to review.

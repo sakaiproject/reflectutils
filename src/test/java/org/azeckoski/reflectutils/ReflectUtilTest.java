@@ -939,7 +939,7 @@ public class ReflectUtilTest {
         assertNotNull(result);
         assertEquals(Double.class, result);
 
-        List v = new Vector<Object>();
+        List v = new ArrayList<Object>();
         v.add( Integer.valueOf(30) );
         result = ReflectUtils.getClassFromCollection(v);
         assertNotNull(result);

@@ -15,11 +15,10 @@
 package org.azeckoski.reflectutils;
 
 import org.azeckoski.reflectutils.ClassFields.FieldFindMode;
-import org.azeckoski.reflectutils.refmap.ReferenceMap;
-import org.azeckoski.reflectutils.refmap.ReferenceType;
-
 import java.lang.ref.SoftReference;
+import java.util.Collections;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
  * Class which provides access to the analysis objects and the cached reflection data
@@ -117,9 +116,7 @@ public class ClassDataCacher {
     @SuppressWarnings("unchecked")
     protected Map<Class<?>, ClassFields> getReflectionCache() {
         if (reflectionCache == null) {
-            // internally we are using the ReferenceMap (from the Guice codebase)
-            // modeled after the groovy reflection caching (weak -> soft)
-            reflectionCache = new ReferenceMap<Class<?>,ClassFields>(ReferenceType.WEAK, ReferenceType.SOFT);
+            reflectionCache = Collections.synchronizedMap(new WeakHashMap<Class<?>, ClassFields>());
         }
         return reflectionCache;
     }
@@ -134,7 +131,9 @@ public class ClassDataCacher {
     @SuppressWarnings("unchecked")
     public void setReflectionCache(Map<Class<?>, ClassFields> reflectionCache) {
         if (reflectionCache != null) {
-            this.reflectionCache.clear();
+            if (this.reflectionCache != null) {
+                this.reflectionCache.clear();
+            }
             this.reflectionCache = reflectionCache;
         } else {
             getReflectionCache();

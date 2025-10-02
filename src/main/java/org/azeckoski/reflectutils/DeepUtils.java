@@ -23,13 +23,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.LinkedHashMap;
 
 import org.azeckoski.reflectutils.ClassFields.FieldsFilter;
-import org.azeckoski.reflectutils.beanutils.FieldAdapter;
 import org.azeckoski.reflectutils.exceptions.FieldGetValueException;
 import org.azeckoski.reflectutils.exceptions.FieldSetValueException;
 import org.azeckoski.reflectutils.exceptions.FieldnameNotFoundException;
-import org.azeckoski.reflectutils.map.ArrayOrderedMap;
 
 /**
  * Class which provides methods for handling deep operations: <br/>
@@ -65,10 +64,6 @@ public class DeepUtils {
 
     protected FieldUtils getFieldUtils() {
         return FieldUtils.getInstance();
-    }
-
-    protected FieldAdapter getFieldAdapter() {
-        return getFieldUtils().getFieldAdapter();
     }
 
     /**
@@ -311,7 +306,7 @@ public class DeepUtils {
                             if ( ConstructorUtils.isClassBean(componentType) 
                                     && CopyDestination.MAP.equals(dest)) {
                                 // special array component type for arrays of objects when map converting
-                                componentType = ArrayOrderedMap.class;
+                                componentType = LinkedHashMap.class;
                             }
                             copy = ArrayUtils.create(componentType, length);
                             // now copy the stuff into it
@@ -347,40 +342,11 @@ public class DeepUtils {
                                     continue;
                                 }                     
                             }
-                        } else if (getFieldAdapter().isAdaptableClass(beanClass)) {
-                            // special handling for dynabeans
-                            if (CopyDestination.MAP.equals(dest)) {
-                                copy = new ArrayOrderedMap<String, Object>();
-                            } else {
-                                copy = getFieldAdapter().newInstance(bean); // make new dynabean
-                            }
-                            List<String> propertyNames = getFieldAdapter().getPropertyNames(bean);
-                            for (String name : propertyNames) {
-                                if ( fieldNamesToSkip != null
-                                        && fieldNamesToSkip.contains(name) ) {
-                                    continue; // skip to next
-                                }
-                                try {
-                                    Object value = getFieldAdapter().getSimpleValue(bean, name);
-                                    if (value == null && ignoreNulls) {
-                                        continue;
-                                    }
-                                    if (CopyDestination.MAP.equals(dest)) {
-                                        ((Map<String, Object>) copy).put(name, 
-                                                internalDeepClone(value, dest, maxDepth, null, currentDepth, ignoreNulls, ignoreTransient) );
-                                    } else {
-                                        getFieldUtils().setFieldValue(copy, name, 
-                                                internalDeepClone(value, dest, maxDepth, null, currentDepth, ignoreNulls, ignoreTransient) );
-                                    }
-                                } catch (IllegalArgumentException e) {
-                                    // this is ok, field might not be readable so we will not clone it, continue on
-                                }
-                            }
                         } else {
                             // regular javabean
                             FieldsFilter filter = FieldsFilter.COMPLETE;
                             if (CopyDestination.MAP.equals(dest)) {
-                                copy = new ArrayOrderedMap<String, Object>();
+                                copy = new LinkedHashMap<String, Object>();
                                 // maps should pick up all readable fields
                                 if (ignoreTransient) {
                                     filter = FieldsFilter.SERIALIZABLE;
@@ -521,27 +487,6 @@ public class DeepUtils {
                     } else {
                         ((Map) dest).put(key, 
                                 internalDeepClone(value, CopyDestination.ORIGINAL, maxDepth, null, currentDepth, ignoreNulls, false));
-                    }
-                }
-            } else if (getFieldAdapter().isAdaptableClass(origClass)) {
-                List<String> propertyNames = getFieldAdapter().getPropertyNames(orig);
-                for (String name : propertyNames) {
-                    if ( fieldNamesToSkip != null
-                            && fieldNamesToSkip.contains(name) ) {
-                        continue; // skip to next
-                    }
-                    try {
-                        Object value = getFieldAdapter().getSimpleValue(orig, name);
-                        if (ignoreNulls && value == null) {
-                            // don't copy this null over the existing value
-                        } else {
-                            getFieldUtils().setFieldValue(dest, name, 
-                                    internalDeepClone(value, CopyDestination.ORIGINAL, maxDepth, null, currentDepth, ignoreNulls, false));
-                        }
-                    } catch (FieldnameNotFoundException e) {
-                        // it is ok for the objects to not be the same
-                    } catch (IllegalArgumentException e) {
-                        // it is ok for the objects to not be the same
                     }
                 }
             } else {

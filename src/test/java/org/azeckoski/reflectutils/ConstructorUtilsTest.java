@@ -27,7 +27,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.Vector;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +40,6 @@ import org.azeckoski.reflectutils.classes.TestNesting;
 import org.azeckoski.reflectutils.classes.TestNoPubConstructor;
 import org.azeckoski.reflectutils.classes.TestPea;
 import org.azeckoski.reflectutils.classes.TestUltraNested;
-import org.azeckoski.reflectutils.map.ArrayOrderedMap;
 
 
 /**
@@ -163,10 +163,10 @@ public class ConstructorUtilsTest {
 
     @Test
     public void testGetClassFromInterface() {
-        assertEquals(Vector.class, ConstructorUtils.getClassFromInterface(List.class));
-        assertEquals(HashSet.class, ConstructorUtils.getClassFromInterface(Set.class));
-        assertEquals(ArrayOrderedMap.class, ConstructorUtils.getClassFromInterface(Map.class));
-        assertEquals(Vector.class, ConstructorUtils.getClassFromInterface(Collection.class));
+        assertEquals(ArrayList.class, ConstructorUtils.getClassFromInterface(List.class));
+        assertEquals(LinkedHashSet.class, ConstructorUtils.getClassFromInterface(Set.class));
+        assertEquals(LinkedHashMap.class, ConstructorUtils.getClassFromInterface(Map.class));
+        assertEquals(ArrayList.class, ConstructorUtils.getClassFromInterface(Collection.class));
         assertEquals(Long.class, ConstructorUtils.getClassFromInterface(Long.class));
         assertEquals(Integer.class, ConstructorUtils.getClassFromInterface(Integer.class));
         assertEquals(String.class, ConstructorUtils.getClassFromInterface(String.class));
@@ -174,11 +174,11 @@ public class ConstructorUtilsTest {
         assertEquals(int.class, ConstructorUtils.getClassFromInterface(int.class));
 
         // test special cases
-        assertEquals(Vector.class, ConstructorUtils.getClassFromInterface(Arrays.asList(new ArrayList<String>()).getClass()));
-        assertEquals(Vector.class, ConstructorUtils.getClassFromInterface(Collections.synchronizedCollection(new ArrayList<String>()).getClass()));
-        assertEquals(Vector.class, ConstructorUtils.getClassFromInterface(Collections.synchronizedList(new ArrayList<String>()).getClass()));
-        assertEquals(HashSet.class, ConstructorUtils.getClassFromInterface(Collections.synchronizedSet(new HashSet<String>()).getClass()));
-        assertEquals(ArrayOrderedMap.class, ConstructorUtils.getClassFromInterface(Collections.synchronizedMap(new HashMap<String,String>()).getClass()));
+        assertEquals(ArrayList.class, ConstructorUtils.getClassFromInterface(Arrays.asList(new ArrayList<String>()).getClass()));
+        assertEquals(ArrayList.class, ConstructorUtils.getClassFromInterface(Collections.synchronizedCollection(new ArrayList<String>()).getClass()));
+        assertEquals(ArrayList.class, ConstructorUtils.getClassFromInterface(Collections.synchronizedList(new ArrayList<String>()).getClass()));
+        assertEquals(LinkedHashSet.class, ConstructorUtils.getClassFromInterface(Collections.synchronizedSet(new HashSet<String>()).getClass()));
+        assertEquals(LinkedHashMap.class, ConstructorUtils.getClassFromInterface(Collections.synchronizedMap(new HashMap<String,String>()).getClass()));
         assertEquals(TreeSet.class, ConstructorUtils.getClassFromInterface(Collections.synchronizedSortedSet(new TreeSet<String>()).getClass()));
         assertEquals(TreeMap.class, ConstructorUtils.getClassFromInterface(Collections.synchronizedSortedMap(new TreeMap<String,String>()).getClass()));
     }

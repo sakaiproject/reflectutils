@@ -18,8 +18,6 @@ import org.azeckoski.reflectutils.annotations.ReflectIgnoreClassFields;
 import org.azeckoski.reflectutils.annotations.ReflectIncludeStaticFields;
 import org.azeckoski.reflectutils.annotations.ReflectTransientClassFields;
 import org.azeckoski.reflectutils.exceptions.FieldnameNotFoundException;
-import org.azeckoski.reflectutils.map.ArrayOrderedMap;
-import org.azeckoski.reflectutils.map.OrderedMap;
 
 import java.beans.*;
 import java.lang.annotation.Annotation;
@@ -188,7 +186,7 @@ public class ClassFields<T> {
      */
     public List<String> getFieldNames(FieldsFilter filter) {
         List<String> names = new ArrayList<String>();
-        for (Entry<String, ClassProperty> entry : namesToProperties.getEntries()) {
+        for (Entry<String, ClassProperty> entry : namesToProperties.entrySet()) {
             String name = entry.getKey();
             ClassProperty cp = entry.getValue();
             if ( isFieldInFilter(cp, filter) ) {
@@ -212,9 +210,8 @@ public class ClassFields<T> {
      * @return the map of fieldName -> field type
      */
     public Map<String, Class<?>> getFieldTypes(FieldsFilter filter) {
-        OrderedMap<String, Class<?>> fieldTypes = new ArrayOrderedMap<String, Class<?>>();
-        fieldTypes.setName(getStoredClass().getName());
-        for (Entry<String, ClassProperty> entry : namesToProperties.getEntries()) {
+        Map<String, Class<?>> fieldTypes = new LinkedHashMap<String, Class<?>>();
+        for (Entry<String, ClassProperty> entry : namesToProperties.entrySet()) {
             String name = entry.getKey();
             ClassProperty cp = entry.getValue();
             if ( isFieldInFilter(cp, filter) ) {
@@ -475,7 +472,7 @@ public class ClassFields<T> {
     private final Set<String> transientFieldNames = new HashSet<String>();
     // WARNING: all these things can hold open a ClassLoader
     private final ClassData<T> classData;
-    private final OrderedMap<String, ClassProperty> namesToProperties; // this contains all properties data (includes partials)
+    private final Map<String, ClassProperty> namesToProperties; // this contains all properties data (includes partials)
 
     // PUBLIC constructors
 
@@ -508,7 +505,7 @@ public class ClassFields<T> {
         classData = new ClassData<T>(fieldClass);
         fieldFindMode = FieldFindMode.HYBRID;
         // set the properties
-        namesToProperties = new ArrayOrderedMap<String, ClassProperty>(getterMethods.length
+        namesToProperties = new LinkedHashMap<String, ClassProperty>(getterMethods.length
                 + publicFields.length);
         for (int i = 0; i < getterMethods.length; i++) {
             if (getterMethods[i] != null && setterMethods[i] != null) {
@@ -544,7 +541,7 @@ public class ClassFields<T> {
         }
         classData = new ClassData<T>(fieldClass);
         fieldFindMode = FieldFindMode.HYBRID;
-        namesToProperties = new ArrayOrderedMap<String, ClassProperty>(descriptors.length + publicFields.length);
+        namesToProperties = new LinkedHashMap<String, ClassProperty>(descriptors.length + publicFields.length);
         populateProperties(descriptors);
         populateFields(publicFields);
         populateAnnotationsFields();
@@ -611,7 +608,7 @@ public class ClassFields<T> {
         classData = new ClassData<T>(fieldClass);
         fieldFindMode = findMode;
         includeClassField = includeClassFields;
-        namesToProperties = new ArrayOrderedMap<String, ClassProperty>();
+        namesToProperties = new LinkedHashMap<String, ClassProperty>();
 
         // check for reflect annotations on the class
         List<Annotation> annotations = classData.getAnnotations();
@@ -892,7 +889,7 @@ public class ClassFields<T> {
     @SuppressWarnings("SameParameterValue")
     private List<ClassProperty> findProperties(boolean includePartial) {
         // find the property methods from all public methods
-        Map<String, ClassProperty> propertyMap = new ArrayOrderedMap<String, ClassProperty>();
+        Map<String, ClassProperty> propertyMap = new LinkedHashMap<String, ClassProperty>();
         for (Method method : classData.getPublicMethods()) {
             Class<?>[] paramTypes = method.getParameterTypes();
             String name = method.getName();

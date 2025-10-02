@@ -18,19 +18,17 @@ import org.azeckoski.reflectutils.ClassFields.FieldsFilter;
 import org.azeckoski.reflectutils.ClassProperty.IndexedProperty;
 import org.azeckoski.reflectutils.ClassProperty.MappedProperty;
 import org.azeckoski.reflectutils.beanutils.DefaultResolver;
-import org.azeckoski.reflectutils.beanutils.FieldAdapter;
-import org.azeckoski.reflectutils.beanutils.FieldAdapterManager;
 import org.azeckoski.reflectutils.beanutils.Resolver;
 import org.azeckoski.reflectutils.exceptions.FieldGetValueException;
 import org.azeckoski.reflectutils.exceptions.FieldSetValueException;
 import org.azeckoski.reflectutils.exceptions.FieldnameNotFoundException;
-import org.azeckoski.reflectutils.map.ArrayOrderedMap;
 
 import java.lang.ref.SoftReference;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -66,8 +64,6 @@ public class FieldUtils {
     public FieldUtils(Resolver resolver) {
         setResolver(resolver);
 
-        fieldAdapterManager = new FieldAdapterManager();
-
         FieldUtils.setInstance(this);
     }
 
@@ -98,18 +94,6 @@ public class FieldUtils {
         }
         return nameResolver;
     }
-
-
-    protected FieldAdapterManager fieldAdapterManager;
-    /**
-     * INTERNAL USAGE
-     * @return the field adapter being used by this set of field utils
-     */
-    public FieldAdapter getFieldAdapter() {
-        return fieldAdapterManager.getFieldAdapter();
-    }
-
-
     /**
      * Analyze a class and produce an object which contains information about it and its fields
      * @param <T>
@@ -253,9 +237,7 @@ public class FieldUtils {
         String targetName = getResolver().getProperty(name); // simple name of target field
         // get the type
         Class<?> fieldType;
-        if (fieldAdapterManager.isAdaptableObject(obj)) {
-            fieldType = fieldAdapterManager.getFieldAdapter().getFieldType(obj, targetName);
-        } else if ( ConstructorUtils.isClassObjectHolder(obj.getClass()) 
+        if ( ConstructorUtils.isClassObjectHolder(obj.getClass()) 
                 || Object.class.equals(obj.getClass()) ) {
             // special handling for the holder types, needed because attempting to analyze a map or other container will cause a failure
             fieldType = Object.class;
@@ -350,26 +332,22 @@ public class FieldUtils {
         if (obj == null) {
             throw new IllegalArgumentException("obj cannot be null");
         }
-        Map<String, Object> values = new ArrayOrderedMap<String, Object>();
+        Map<String, Object> values = new LinkedHashMap<String, Object>();
         if (includeClassField) {
             // add as the first field
             values.put(ClassFields.FIELD_CLASS, obj.getClass());
         }
-        if (fieldAdapterManager.isAdaptableObject(obj)) {
-            values.putAll( fieldAdapterManager.getFieldAdapter().getFieldValues(obj, filter) );
-        } else {
-            Map<String, Class<?>> types = getFieldTypes(obj.getClass(), filter);
-            if (FieldsFilter.WRITEABLE.equals(filter)) {
-                types.clear();
-            }
-            for (String name : types.keySet()) {
-                try {
-                    Object o = getFieldValue(obj, name);
-                    values.put(name, o);
-                } catch (RuntimeException e) {
-                    // failed to get the value so we will skip this one
-                    continue;
-                }
+        Map<String, Class<?>> types = getFieldTypes(obj.getClass(), filter);
+        if (FieldsFilter.WRITEABLE.equals(filter)) {
+            types.clear();
+        }
+        for (String name : types.keySet()) {
+            try {
+                Object o = getFieldValue(obj, name);
+                values.put(name, o);
+            } catch (RuntimeException e) {
+                // failed to get the value so we will skip this one
+                continue;
             }
         }
         return values;
@@ -588,7 +566,7 @@ public class FieldUtils {
                             Class<?> type = getFieldType(obj, next);
                             if (Object.class.equals(type)) {
                                 // indeterminate type so we will make a map
-                                type = ArrayOrderedMap.class;
+                                type = LinkedHashMap.class;
                             }
                             nestedBean = getConstructorUtils().constructClass(type);
                             setFieldValue(obj, next, nestedBean, false); // need to put this new object into the parent
@@ -629,29 +607,24 @@ public class FieldUtils {
         }
 
         Object value;
-        // Handle DynaBean instances specially
-        if (fieldAdapterManager.isAdaptableObject(obj)) {
-            value = fieldAdapterManager.getFieldAdapter().getSimpleValue(obj, name);
-        } else {
-            // normal bean
-            ClassFields<?> cf = analyzeObject(obj);
+        // normal bean
+        ClassFields<?> cf = analyzeObject(obj);
+        try {
+            // use the class property
+            ClassProperty cp = cf.getClassProperty(name);
+            value = findFieldValue(obj, cp);
+        } catch (FieldnameNotFoundException fnfe) {
+            // could not find this as a standard field so handle as internal lookup
+            ClassData<?> cd = cf.getClassData();
+            Field field = getFieldIfPossible(cd, name);
+            if (field == null) {
+                throw new FieldnameNotFoundException("Could not find field with name ("+name+") on object (" + obj + ") after extended look into non-visible fields", fnfe);
+            }
             try {
-                // use the class property
-                ClassProperty cp = cf.getClassProperty(name);
-                value = findFieldValue(obj, cp);
-            } catch (FieldnameNotFoundException fnfe) {
-                // could not find this as a standard field so handle as internal lookup
-                ClassData<?> cd = cf.getClassData();
-                Field field = getFieldIfPossible(cd, name);
-                if (field == null) {
-                    throw new FieldnameNotFoundException("Could not find field with name ("+name+") on object (" + obj + ") after extended look into non-visible fields", fnfe);
-                }
-                try {
-                    value = field.get(obj);
-                } catch (Exception e) {
-                    // catching the general exception is correct here, translate the exception
-                    throw new FieldGetValueException("Field get failure getting value for field ("+name+") from non-visible field in object: " + obj, name, obj, e);
-                }
+                value = field.get(obj);
+            } catch (Exception e) {
+                // catching the general exception is correct here, translate the exception
+                throw new FieldGetValueException("Field get failure getting value for field ("+name+") from non-visible field in object: " + obj, name, obj, e);
             }
         }
         return value;
@@ -694,68 +667,55 @@ public class FieldUtils {
         }
 
         boolean indexedProperty = false;
-        // Handle DynaBean instances specially
-        if (fieldAdapterManager.isAdaptableObject(obj)) {
-            value = fieldAdapterManager.getFieldAdapter().getIndexedValue(obj, name, index);
+        boolean isArray = false;
+        Object indexedObject = null;
+
+        if (obj.getClass().isArray()) {
+            indexedObject = obj;
+            isArray = true;
+        } else if (List.class.isAssignableFrom(obj.getClass())) {
+            indexedObject = obj;
         } else {
-            boolean isArray = false;
-            Object indexedObject = null;
-            if (obj.getClass().isArray()) {
-                indexedObject = obj;
-                isArray = true;
-            } else if (List.class.isAssignableFrom(obj.getClass())) {
-                indexedObject = obj;
-            } else {
-                // normal bean
-                ClassFields cf = analyzeObject(obj);
-                ClassProperty cp = cf.getClassProperty(name);
-                if (! cp.isIndexed()) {
-                    throw new IllegalArgumentException("This field ("+name+") is not an indexed field");
-                }
-                isArray = cp.isArray();
-                // try to get the indexed getter and use that first
-                if (cp instanceof IndexedProperty) {
-                    indexedProperty = true;
-                    IndexedProperty icp = (IndexedProperty) cp;
-                    try {
-                        Method getter = icp.getIndexGetter();
-                        //noinspection RedundantArrayCreation
-                        value = getter.invoke(obj, new Object[] {index});
-                    } catch (Exception e) {
-                        // catching the general exception is correct here, translate the exception
-                        throw new FieldGetValueException("Indexed getter method failure getting indexed ("
-                                +index+") value for name ("+cp.getFieldName()+") from: " + obj, cp.getFieldName(), obj, e);
-                    }
-                } else {
-                    indexedObject = findFieldValue(obj, cp);
+            ClassFields<?> cf = analyzeObject(obj);
+            ClassProperty cp = cf.getClassProperty(name);
+            if (!cp.isIndexed()) {
+                throw new IllegalArgumentException("This field (" + name + ") is not an indexed field");
+            }
+            isArray = cp.isArray();
+            if (cp instanceof IndexedProperty) {
+                indexedProperty = true;
+                IndexedProperty icp = (IndexedProperty) cp;
+                try {
+                    Method getter = icp.getIndexGetter();
+                    value = getter.invoke(obj, index);
+                } catch (Exception e) {
+                    throw new FieldGetValueException("Indexed getter method failure getting indexed (" + index + ") value for name (" + cp.getFieldName() + ") from: " + obj, cp.getFieldName(), obj, e);
                 }
             }
             if (!indexedProperty) {
-                // now get the indexed value if possible
-                if (indexedObject != null) {
-                    if (isArray) {
-                        // this is an array
-                        try {
-                            // get value from array
-                            value = Array.get(indexedObject, index);
-                        } catch (ArrayIndexOutOfBoundsException e) {
-                            throw new IllegalArgumentException("Index ("+index+") is out of bounds ("+Array.getLength(indexedObject)+") for the array: " + indexedObject, e);
-                        }
-                    } else {
-                        // this better be a list
-                        if (! List.class.isAssignableFrom(indexedObject.getClass())) {
-                            throw new IllegalArgumentException("Field (" + name + ") does not appear to be indexed (not an array or a list)");
-                        } else {
-                            // get value from list
-                            try {
-                                value = ((List)indexedObject).get(index);
-                            } catch (IndexOutOfBoundsException e) {
-                                throw new IllegalArgumentException("Index ("+index+") is out of bounds ("+((List)indexedObject).size()+") for the list: " + indexedObject, e);
-                            }
-                        }
-                    }
-                } else {
-                    throw new IllegalArgumentException("Indexed object is null, cannot retrieve index ("+index+") value from field ("+name+")");
+                indexedObject = findFieldValue(obj, cp);
+            }
+        }
+
+        if (!indexedProperty) {
+            if (indexedObject == null) {
+                throw new IllegalArgumentException("Indexed object is null, cannot retrieve index (" + index + ") value from field (" + name + ")");
+            }
+            if (isArray) {
+                try {
+                    value = Array.get(indexedObject, index);
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    throw new IllegalArgumentException("Index (" + index + ") is out of bounds (" + Array.getLength(indexedObject) + ") for the array: " + indexedObject, e);
+                }
+            } else {
+                if (!List.class.isAssignableFrom(indexedObject.getClass())) {
+                    throw new IllegalArgumentException("Field (" + name + ") does not appear to be indexed (not an array or a list)");
+                }
+                List<?> list = (List<?>) indexedObject;
+                try {
+                    value = list.get(index);
+                } catch (IndexOutOfBoundsException e) {
+                    throw new IllegalArgumentException("Index (" + index + ") is out of bounds (" + list.size() + ") for the list: " + indexedObject, e);
                 }
             }
         }
@@ -797,52 +757,47 @@ public class FieldUtils {
         }
 
         boolean mappedProperty = false;
-        // Handle DynaBean instances specially
-        if (fieldAdapterManager.isAdaptableObject(obj)) {
-            value = fieldAdapterManager.getFieldAdapter().getMappedValue(obj, name, key);
+        Map map = null;
+        if (Map.class.isAssignableFrom(obj.getClass())) {
+            map = (Map) obj;
         } else {
-            Map map = null;
-            if (Map.class.isAssignableFrom(obj.getClass())) {
-                map = (Map) obj;
-            } else {
-                // normal bean
-                ClassFields cf = analyzeObject(obj);
-                ClassProperty cp = cf.getClassProperty(name);
-                if (! cp.isMapped()) {
-                    throw new IllegalArgumentException("This field ("+name+") is not an mapped field");
-                }
-                // try to get the mapped getter and use that first
-                if (cp instanceof MappedProperty) {
-                    mappedProperty = true;
-                    MappedProperty mcp = (MappedProperty) cp;
-                    try {
-                        Method getter = mcp.getMapGetter();
-                        //noinspection RedundantArrayCreation
-                        value = getter.invoke(obj, new Object[] {key});
-                    } catch (Exception e) {
-                        // catching the general exception is correct here, translate the exception
-                        throw new FieldGetValueException("Mapped getter method failure getting mapped ("
-                                +key+") value for name ("+cp.getFieldName()+") from: " + obj, cp.getFieldName(), obj, e);
-                    }
-                } else {
-                    Object o = findFieldValue(obj, cp);
-                    if (! Map.class.isAssignableFrom(o.getClass())) {
-                        throw new IllegalArgumentException("Field (" + name + ") does not appear to be a map (not instance of Map)");
-                    }
-                    map = (Map) o;
-                }
+            // normal bean
+            ClassFields cf = analyzeObject(obj);
+            ClassProperty cp = cf.getClassProperty(name);
+            if (! cp.isMapped()) {
+                throw new IllegalArgumentException("This field ("+name+") is not an mapped field");
             }
-            // get the value from the map
-            if (!mappedProperty) {
-                if (map != null) {
-                    try {
-                        value = map.get(key);
-                    } catch (Exception e) {
-                        throw new IllegalArgumentException("Key ("+key+") is invalid ("+map.size()+") for the map: " + map, e);
-                    }
-                } else {
-                    throw new IllegalArgumentException("Mapped object is null, cannot retrieve key ("+key+") value from field ("+name+")");
+            // try to get the mapped getter and use that first
+            if (cp instanceof MappedProperty) {
+                mappedProperty = true;
+                MappedProperty mcp = (MappedProperty) cp;
+                try {
+                    Method getter = mcp.getMapGetter();
+                    //noinspection RedundantArrayCreation
+                    value = getter.invoke(obj, new Object[] {key});
+                } catch (Exception e) {
+                    // catching the general exception is correct here, translate the exception
+                    throw new FieldGetValueException("Mapped getter method failure getting mapped ("
+                            +key+") value for name ("+cp.getFieldName()+") from: " + obj, cp.getFieldName(), obj, e);
                 }
+            } else {
+                Object o = findFieldValue(obj, cp);
+                if (! Map.class.isAssignableFrom(o.getClass())) {
+                    throw new IllegalArgumentException("Field (" + name + ") does not appear to be a map (not instance of Map)");
+                }
+                map = (Map) o;
+            }
+        }
+        // get the value from the map
+        if (!mappedProperty) {
+            if (map != null) {
+                try {
+                    value = map.get(key);
+                } catch (Exception e) {
+                    throw new IllegalArgumentException("Key ("+key+") is invalid ("+map.size()+") for the map: " + map, e);
+                }
+            } else {
+                throw new IllegalArgumentException("Mapped object is null, cannot retrieve key ("+key+") value from field ("+name+")");
             }
         }
         return value;
@@ -928,29 +883,24 @@ public class FieldUtils {
             throw new IllegalArgumentException("field name cannot be null or blank");
         }
 
-        // Handle DynaBean instances specially
-        if (fieldAdapterManager.isAdaptableObject(obj)) {
-            fieldAdapterManager.getFieldAdapter().setSimpleValue(obj, name, value);
-        } else {
-            // normal bean
-            ClassFields<?> cf = analyzeObject(obj);
+        // normal bean
+        ClassFields<?> cf = analyzeObject(obj);
+        try {
+            ClassProperty cp = cf.getClassProperty(name);
+            assignFieldValue(obj, cp, value);
+        } catch (FieldnameNotFoundException fnfe) {
+            // could not find this as a standard field so handle as internal lookup
+            ClassData<?> cd = cf.getClassData();
+            Field field = getFieldIfPossible(cd, name);
+            if (field == null) {
+                throw new FieldnameNotFoundException("Could not find field with name ("+name+") on object (" + obj + ") after extended look into non-visible fields", fnfe);
+            }
             try {
-                ClassProperty cp = cf.getClassProperty(name);
-                assignFieldValue(obj, cp, value);
-            } catch (FieldnameNotFoundException fnfe) {
-                // could not find this as a standard field so handle as internal lookup
-                ClassData<?> cd = cf.getClassData();
-                Field field = getFieldIfPossible(cd, name);
-                if (field == null) {
-                    throw new FieldnameNotFoundException("Could not find field with name ("+name+") on object (" + obj + ") after extended look into non-visible fields", fnfe);
-                }
-                try {
-                    value = getConversionUtils().convert(value, field.getType());
-                    field.set(obj, value);
-                } catch (Exception e) {
-                    // catching the general exception is correct here, translate the exception
-                    throw new FieldSetValueException("Field set failure setting value ("+value+") for field ("+name+") from non-visible field in object: " + obj, name, obj, e);
-                }
+                value = getConversionUtils().convert(value, field.getType());
+                field.set(obj, value);
+            } catch (Exception e) {
+                // catching the general exception is correct here, translate the exception
+                throw new FieldSetValueException("Field set failure setting value ("+value+") for field ("+name+") from non-visible field in object: " + obj, name, obj, e);
             }
         }
     }
@@ -988,111 +938,87 @@ public class FieldUtils {
         }
 
         boolean indexedProperty = false;
-        // Handle DynaBean instances specially
-        if (fieldAdapterManager.isAdaptableObject(obj)) {
-            fieldAdapterManager.getFieldAdapter().setIndexedValue(obj, name, index, value);
+        boolean isArray = false;
+        Object indexedObject = null;
+
+        if (ConstructorUtils.isClassArray(obj.getClass())) {
+            indexedObject = obj;
+            isArray = true;
+        } else if (ConstructorUtils.isClassList(obj.getClass())) {
+            indexedObject = obj;
         } else {
-            boolean isArray = false;
-            Object indexedObject = null;
-            if ( ConstructorUtils.isClassArray(obj.getClass()) ) {
-                indexedObject = obj;
-                isArray = true;
-            } else if ( ConstructorUtils.isClassList(obj.getClass()) ) {
-                indexedObject = obj;
-            } else {
-                // normal bean
-                ClassFields cf = analyzeObject(obj);
-                ClassProperty cp = cf.getClassProperty(name);
-                if (! cp.isIndexed()) {
-                    throw new IllegalArgumentException("This field ("+name+") is not an indexed field");
-                }
-                isArray = cp.isArray();
-                // try to get the indexed setter and use that first
-                if (cp instanceof IndexedProperty) {
-                    indexedProperty = true;
-                    IndexedProperty icp = (IndexedProperty) cp;
-                    try {
-                        Method setter = icp.getIndexSetter();
-                        //noinspection RedundantArrayCreation
-                        setter.invoke(obj, new Object[] {index, value});
-                    } catch (Exception e) {
-                        // catching the general exception is correct here, translate the exception
-                        throw new FieldSetValueException("Indexed setter method failure setting indexed ("
-                                +index+") value for name ("+cp.getFieldName()+") on: " + obj, cp.getFieldName(), obj, e);
-                    }
-                } else {
-                    // get the field value out and work with it directly
-                    indexedObject = findFieldValue(obj, cp);
-                    if (indexedObject == null) {
-                        // handle nulls by creating if possible
-                        try {
-                            if (isArray) {
-                                // create the array if it is null
-                                Class<?> type = value.getClass();
-                                indexedObject = ArrayUtils.create(type, index+1);
-                            } else { // List
-                                // create the list if it is null, back-fill it, and assign it back to the object
-                                Class<?> type = cp.getType();
-                                if (type.isInterface()) {
-                                    indexedObject = new ArrayList<>(index + 1);
-                                } else {
-                                    indexedObject = getConstructorUtils().constructClass(type);
-                                }
-                            }
-                            setSimpleValue(obj, name, indexedObject);
-                        } catch (Exception e) {
-                            throw new IllegalArgumentException("Indexed object is null, attempt to create list failed, cannot set value for index ("+index+") on field ("+name+")", e);
-                        }
-                    }
+            ClassFields<?> cf = analyzeObject(obj);
+            ClassProperty cp = cf.getClassProperty(name);
+            if (!cp.isIndexed()) {
+                throw new IllegalArgumentException("This field (" + name + ") is not an indexed field");
+            }
+            isArray = cp.isArray();
+            if (cp instanceof IndexedProperty) {
+                indexedProperty = true;
+                IndexedProperty icp = (IndexedProperty) cp;
+                try {
+                    Method setter = icp.getIndexSetter();
+                    setter.invoke(obj, index, value);
+                } catch (Exception e) {
+                    throw new FieldSetValueException("Indexed setter method failure setting indexed (" + index + ") value for name (" + cp.getFieldName() + ") on: " + obj, cp.getFieldName(), obj, e);
                 }
             }
             if (!indexedProperty) {
-                // set the indexed value
-                if (isArray) {
-                    // this is an array
+                indexedObject = findFieldValue(obj, cp);
+                if (indexedObject == null) {
                     try {
-                        // set the value on the array
-                        int length = ArrayUtils.size((Object[])indexedObject);
-                        if (index >= length) {
-                            // automatically expand the array
-                            indexedObject = ArrayUtils.resize((Object[])indexedObject, index+1);
-                            setSimpleValue(obj, name, indexedObject); // need to put the array back into the object
-                        }
-                        // convert this value to the type for the array
-                        Class<?> componentType = ArrayUtils.type((Object[])indexedObject);
-                        Object convert = ReflectUtils.getInstance().convert(value, componentType);
-                        Array.set(indexedObject, index, convert);
-                    } catch (Exception e) {
-                        throw new IllegalArgumentException("Failed to set index ("+index+") for array of size ("+Array.getLength(indexedObject)+") to value: " + value, e);
-                    }
-                } else {
-                    // this better be a list
-                    if (indexedObject == null 
-                            || ! List.class.isAssignableFrom(indexedObject.getClass())) {
-                        throw new IllegalArgumentException("Field (" + name + ") does not appear to be indexed (not an array or a list): " 
-                                + (indexedObject == null ? "NULL" : indexedObject.getClass()) );
-                    } else {
-                        // this is a list
-                        List l = (List) indexedObject;
-                        try {
-                            // set value on list
-                            if (index < 0) {
-                                l.add(value);
+                        if (isArray) {
+                            Class<?> type = value.getClass();
+                            indexedObject = ArrayUtils.create(type, index + 1);
+                        } else {
+                            Class<?> type = cp.getType();
+                            if (type.isInterface()) {
+                                indexedObject = new ArrayList<>(index + 1);
                             } else {
-                                if (index >= l.size()) {
-                                    // automatically expand the list
-                                    int start = l.size();
-                                    for (int i = start; i < (index+1); i++) {
-                                        l.add(i, null);
-                                    }
-                                }
-                                l.set(index, value);
+                                indexedObject = getConstructorUtils().constructClass(type);
                             }
-                        } catch (Exception e) {
-                            // catching the general exception is correct here, translate the exception
-                            throw new IllegalArgumentException("Failed to set index ("+index+") for list of size ("+l.size()+") to value: " + value, e);
                         }
+                        setSimpleValue(obj, name, indexedObject);
+                    } catch (Exception e) {
+                        throw new IllegalArgumentException("Indexed object is null, attempt to create list failed, cannot set value for index (" + index + ") on field (" + name + ")", e);
                     }
+                }
+            }
+        }
+
+        if (!indexedProperty) {
+            if (indexedObject == null) {
+                throw new IllegalArgumentException("Indexed object is null, cannot set value for index (" + index + ") on field (" + name + ")");
+            }
+            if (isArray) {
+                try {
+                    int length = ArrayUtils.size((Object[]) indexedObject);
+                    if (index >= length) {
+                        indexedObject = ArrayUtils.resize((Object[]) indexedObject, index + 1);
+                        setSimpleValue(obj, name, indexedObject);
+                    }
+                    Class<?> componentType = ArrayUtils.type((Object[]) indexedObject);
+                    Object convert = ReflectUtils.getInstance().convert(value, componentType);
+                    Array.set(indexedObject, index, convert);
+                } catch (Exception e) {
+                    throw new IllegalArgumentException("Failed to set index (" + index + ") for array of size (" + Array.getLength(indexedObject) + ") to value: " + value, e);
+                }
+            } else {
+                if (!List.class.isAssignableFrom(indexedObject.getClass())) {
+                    throw new IllegalArgumentException("Field (" + name + ") does not appear to be indexed (not an array or a list): " + indexedObject.getClass());
+                }
+                List<Object> list = (List<Object>) indexedObject;
+                try {
+                    if (index < 0) {
+                        list.add(value);
+                    } else {
+                        while (index >= list.size()) {
+                            list.add(null);
+                        }
+                        list.set(index, value);
+                    }
+                } catch (Exception e) {
+                    throw new IllegalArgumentException("Failed to set index (" + index + ") for list of size (" + list.size() + ") to value: " + value, e);
                 }
             }
         }
@@ -1131,14 +1057,10 @@ public class FieldUtils {
         }
 
         boolean mappedProperty = false;
-        // Handle DynaBean instances specially
-        if (fieldAdapterManager.isAdaptableObject(obj)) {
-            fieldAdapterManager.getFieldAdapter().setMappedValue(obj, name, key, value);
+        Map map = null;
+        if (Map.class.isAssignableFrom(obj.getClass())) {
+            map = (Map) obj;
         } else {
-            Map map = null;
-            if (Map.class.isAssignableFrom(obj.getClass())) {
-                map = (Map) obj;
-            } else {
                 // normal bean
                 ClassFields cf = analyzeObject(obj);
                 ClassProperty cp = cf.getClassProperty(name);
@@ -1165,7 +1087,7 @@ public class FieldUtils {
                         try {
                             Class<?> type = cp.getType();
                             if (type.isInterface()) {
-                                map = new ArrayOrderedMap(5);
+                                map = new LinkedHashMap(5);
                             } else {
                                 map = (Map) getConstructorUtils().constructClass(type);
                             }
@@ -1181,18 +1103,17 @@ public class FieldUtils {
                         map = (Map) o;
                     }
                 }
+        }
+        if (!mappedProperty) {
+            // set value in map
+            if (map == null) {
+                throw new IllegalArgumentException("Mapped object is null, cannot set value for key ("+key+") on field ("+name+")");
             }
-            if (!mappedProperty) {
-                // set value in map
-                if (map == null) {
-                    throw new IllegalArgumentException("Mapped object is null, cannot set value for key ("+key+") on field ("+name+")");
-                }
-                // set value on map
-                try {
-                    map.put(key, value);
-                } catch (Exception e) {
-                    throw new IllegalArgumentException("Value ("+value+") cannot be put for key ("+key+") for the map: " + map, e);
-                }
+            // set value on map
+            try {
+                map.put(key, value);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Value ("+value+") cannot be put for key ("+key+") for the map: " + map, e);
             }
         }
     }

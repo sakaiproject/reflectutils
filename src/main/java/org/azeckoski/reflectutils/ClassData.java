@@ -16,8 +16,10 @@ package org.azeckoski.reflectutils;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -135,20 +137,8 @@ public class ClassData<T> {
         for (final Field field : fields) {
             if (field != null) {
                 int modifiers = field.getModifiers();
-                if (Modifier.isPublic(modifiers)) {
+                if (Modifier.isPublic(modifiers) || trySetAccessible(field)) {
                     fList.add(field);
-                } else {
-                    try {
-                        AccessController.doPrivileged(new PrivilegedAction<T>() {
-                            public T run() {
-                                field.setAccessible(true);
-                                return null;
-                            }
-                        });
-                        fList.add(field);
-                    } catch (SecurityException e) {
-                        // oh well, this does not get added then
-                    }
                 }
             }
         }
@@ -156,20 +146,8 @@ public class ClassData<T> {
         for (final Method method : methods) {
             if (method != null) {
                 int modifiers = method.getModifiers();
-                if (Modifier.isPublic(modifiers)) {
+                if (Modifier.isPublic(modifiers) || trySetAccessible(method)) {
                     mList.add(method);
-                } else {
-                    try {
-                        AccessController.doPrivileged(new PrivilegedAction<T>() {
-                            public T run() {
-                                method.setAccessible(true);
-                                return null;
-                            }
-                        });
-                        mList.add(method);
-                    } catch (SecurityException e) {
-                        // oh well, this does not get added then
-                    }
                 }
             }
         }
@@ -178,20 +156,8 @@ public class ClassData<T> {
             // need to avoid the Object constructor
             if (!Object.class.equals(type) && constructor != null) {
                 int modifiers = constructor.getModifiers();
-                if (Modifier.isPublic(modifiers)) {
+                if (Modifier.isPublic(modifiers) || trySetAccessible(constructor)) {
                     cList.add((Constructor<T>)constructor);
-                } else {
-                    try {
-                        AccessController.doPrivileged(new PrivilegedAction<T>() {
-                            public T run() {
-                                constructor.setAccessible(true);
-                                return null;
-                            }
-                        });
-                        cList.add((Constructor<T>)constructor);
-                    } catch (SecurityException e) {
-                        // oh well, this does not get added then
-                    }
                 }
             }
         }
@@ -207,6 +173,23 @@ public class ClassData<T> {
         if (superClass != null) {
             sList.add(superClass); // add to superclasses list
             getAllThings(superClass, fList, mList, cList, iList, sList);
+        }
+    }
+
+    private boolean trySetAccessible(final AccessibleObject object) {
+        try {
+            return AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
+                public Boolean run() {
+                    try {
+                        object.setAccessible(true);
+                        return Boolean.TRUE;
+                    } catch (InaccessibleObjectException ex) {
+                        return Boolean.FALSE;
+                    }
+                }
+            });
+        } catch (SecurityException e) {
+            return false;
         }
     }
 
@@ -289,4 +272,3 @@ public class ClassData<T> {
     }
     
 }
-

@@ -15,9 +15,9 @@
 package org.azeckoski.reflectutils.converters;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Vector;
 
 import org.azeckoski.reflectutils.ConstructorUtils;
 import org.azeckoski.reflectutils.converters.api.InterfaceConverter;
@@ -33,7 +33,7 @@ import org.azeckoski.reflectutils.converters.api.InterfaceConverter;
 public class CollectionConverter implements InterfaceConverter<Collection> {
 
     public Collection convert(Object value) {
-        return convertInterface(value, Vector.class);
+        return convertInterface(value, ArrayList.class);
     }
 
     protected ConstructorUtils getConstructorUtils() {
@@ -45,7 +45,7 @@ public class CollectionConverter implements InterfaceConverter<Collection> {
         Class<?> fromType = value.getClass();
         Object toConvert = value;
         if (implementationType == null) {
-            implementationType = Vector.class;
+            implementationType = ArrayList.class;
         } else if (implementationType.isInterface()) {
             implementationType = ConstructorUtils.getClassFromInterface(implementationType);
         }
