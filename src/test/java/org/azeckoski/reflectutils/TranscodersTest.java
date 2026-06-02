@@ -998,6 +998,30 @@ public class TranscodersTest extends TestCase {
 
     }
 
+    public void testXMLDecodeRejectsExternalEntities() {
+        Map<String, Object> ok = new XMLTranscoder().decode("<data><thing>safe</thing></data>");
+        assertEquals("safe", ok.get("thing"));
+
+        assertXMLRejected("<!DOCTYPE data [<!ENTITY xxe SYSTEM 'file:///etc/passwd'>]><data><thing>&xxe;</thing></data>");
+        assertXMLRejected("<!DOCTYPE data SYSTEM 'http://127.0.0.1:9/evil.dtd'><data><thing>safe</thing></data>");
+        assertXMLRejected("<!DOCTYPE data [<!ENTITY % xxe SYSTEM 'file:///etc/passwd'> %xxe;]><data><thing>safe</thing></data>");
+        assertXMLRejected("<!DOCTYPE data [<!ENTITY a \"1234567890\"><!ENTITY b \"&a;&a;&a;&a;&a;\">]><data>&b;</data>");
+
+        Map<String, Object> xinclude = new XMLTranscoder().decode(
+                "<?xml version=\"1.0\"?><data xmlns:xi=\"http://www.w3.org/2001/XInclude\">"
+                + "<marker>ok</marker><xi:include href=\"file:///etc/passwd\" parse=\"text\"/></data>");
+        assertEquals("ok", xinclude.get("marker"));
+    }
+
+    private void assertXMLRejected(String xml) {
+        try {
+            new XMLTranscoder().decode(xml);
+            fail("XML parser should reject unsafe XML");
+        } catch (RuntimeException e) {
+            assertNotNull(e.getMessage());
+        }
+    }
+
     // testing the internal decoder
     @SuppressWarnings("unchecked")
     public void testXMLDecode() {

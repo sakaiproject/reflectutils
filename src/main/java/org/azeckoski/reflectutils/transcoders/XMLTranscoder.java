@@ -17,6 +17,7 @@ package org.azeckoski.reflectutils.transcoders;
 import java.io.ByteArrayInputStream;
 import java.io.CharArrayWriter;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -43,13 +44,22 @@ import org.azeckoski.reflectutils.ClassFields.FieldsFilter;
 import org.azeckoski.reflectutils.map.ArrayOrderedMap;
 
 import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.ext.EntityResolver2;
 import org.xml.sax.helpers.DefaultHandler;
 
 
 /**
  * Provides methods for encoding and decoding XML <br/>
- * Note that the XML parser always trashes the root node currently
+ * Note that the XML parser always trashes the root node currently.
+ * <p>
+ * This class is not thread-safe: concurrent use of a single {@code XMLTranscoder}
+ * instance (especially {@link #decode(String)}) is unsupported.
+ * <p>
+ * XML decoding rejects DOCTYPE declarations and external entities by design to
+ * mitigate XXE. Documents that require a DTD will not parse.
  * 
  * @author Aaron Zeckoski (azeckoski @ gmail.com)
  */
@@ -57,6 +67,16 @@ import org.xml.sax.helpers.DefaultHandler;
 public class XMLTranscoder implements Transcoder {
 
     private static final String ELEMENT = "element";
+    private static final String FEATURE_SECURE_PROCESSING = "http://javax.xml.XMLConstants/feature/secure-processing";
+    private static final String FEATURE_DISALLOW_DOCTYPE_DECL = "http://apache.org/xml/features/disallow-doctype-decl";
+    private static final String FEATURE_EXTERNAL_GENERAL_ENTITIES = "http://xml.org/sax/features/external-general-entities";
+    private static final String FEATURE_EXTERNAL_PARAMETER_ENTITIES = "http://xml.org/sax/features/external-parameter-entities";
+    private static final String FEATURE_LOAD_EXTERNAL_DTD = "http://apache.org/xml/features/nonvalidating/load-external-dtd";
+    private static final String FEATURE_XINCLUDE = "http://apache.org/xml/features/xinclude";
+    private static final String PROPERTY_ACCESS_EXTERNAL_DTD = "http://javax.xml.XMLConstants/property/accessExternalDTD";
+    private static final String PROPERTY_ACCESS_EXTERNAL_SCHEMA = "http://javax.xml.XMLConstants/property/accessExternalSchema";
+    private static final int ERROR_SNIPPET_MAX_LENGTH = 120;
+    private static final String XML_INPUT_CHARSET = "UTF-8";
 
     public String getHandledFormat() {
         return "xml";
@@ -79,6 +99,16 @@ public class XMLTranscoder implements Transcoder {
         return encoded;
     }
 
+    /**
+     * Decode a map from an XML string.
+     * <p>
+     * DOCTYPE declarations are rejected intentionally (XXE mitigation). XML that
+     * relies on a DTD, external entities, or XInclude will fail to parse.
+     *
+     * @param string non-empty XML text
+     * @return parsed map (the root element name is discarded)
+     * @throws IllegalArgumentException if the input is empty or XML is unsafe/invalid
+     */
     public Map<String, Object> decode(String string) {
 //        Object decode = new XMLparser(string).getObject();
 //        if (decode instanceof Map) {
@@ -605,12 +635,13 @@ public class XMLTranscoder implements Transcoder {
 
     // DECODER
 
-    protected SAXParserFactory parserFactory = null;
-    protected SAXParser parser = null;
-    protected SAXParser getParser() {
+    private SAXParserFactory parserFactory = null;
+    private SAXParser parser = null;
+
+    private SAXParser getParser() {
         if (parserFactory == null) {
             parserFactory = SAXParserFactory.newInstance();
-            parserFactory.setValidating(true);
+            configureSecureFactory(parserFactory);
             parserFactory.setNamespaceAware(true);
         }
         if (parser != null) {
@@ -624,6 +655,7 @@ public class XMLTranscoder implements Transcoder {
         if (parser == null) {
             try {
                 parser = parserFactory.newSAXParser();
+                configureSecureParser(parser);
             } catch (ParserConfigurationException e) {
                 throw new RuntimeException("Failed to get XML parser from factory: " + parserFactory, e);
             } catch (SAXException e) {
@@ -633,10 +665,108 @@ public class XMLTranscoder implements Transcoder {
         return parser;
     }
 
+    private static void configureSecureFactory(SAXParserFactory factory) {
+        factory.setValidating(false);
+        try {
+            factory.setXIncludeAware(false);
+        } catch (UnsupportedOperationException e) {
+            // optional: not all JAXP implementations support this call
+        }
+        setRequiredFeature(factory, FEATURE_SECURE_PROCESSING, true);
+        setRequiredFeature(factory, FEATURE_EXTERNAL_GENERAL_ENTITIES, false);
+        setRequiredFeature(factory, FEATURE_EXTERNAL_PARAMETER_ENTITIES, false);
+        setOptionalFeature(factory, FEATURE_DISALLOW_DOCTYPE_DECL, true);
+        setOptionalFeature(factory, FEATURE_LOAD_EXTERNAL_DTD, false);
+        setOptionalFeature(factory, FEATURE_XINCLUDE, false);
+    }
+
+    private void configureSecureParser(SAXParser saxParser) {
+        setRequiredProperty(saxParser, PROPERTY_ACCESS_EXTERNAL_DTD, "");
+        setRequiredProperty(saxParser, PROPERTY_ACCESS_EXTERNAL_SCHEMA, "");
+        try {
+            applySecureReaderFeatures(saxParser.getXMLReader());
+        } catch (SAXException e) {
+            throw new RuntimeException("Failed to secure XML reader", e);
+        }
+    }
+
+    private static void applySecureReaderFeatures(XMLReader xmlReader) {
+        setRequiredFeature(xmlReader, FEATURE_SECURE_PROCESSING, true);
+        setRequiredFeature(xmlReader, FEATURE_EXTERNAL_GENERAL_ENTITIES, false);
+        setRequiredFeature(xmlReader, FEATURE_EXTERNAL_PARAMETER_ENTITIES, false);
+        setOptionalFeature(xmlReader, FEATURE_DISALLOW_DOCTYPE_DECL, true);
+        setOptionalFeature(xmlReader, FEATURE_LOAD_EXTERNAL_DTD, false);
+        setOptionalFeature(xmlReader, FEATURE_XINCLUDE, false);
+        setRequiredProperty(xmlReader, PROPERTY_ACCESS_EXTERNAL_DTD, "");
+        setRequiredProperty(xmlReader, PROPERTY_ACCESS_EXTERNAL_SCHEMA, "");
+    }
+
+    private static void setRequiredFeature(SAXParserFactory factory, String feature, boolean enabled) {
+        try {
+            factory.setFeature(feature, enabled);
+        } catch (ParserConfigurationException e) {
+            throw new RuntimeException("Failed to set XML parser feature " + feature + " to " + enabled, e);
+        } catch (SAXException e) {
+            throw new RuntimeException("Failed to set XML parser feature " + feature + " to " + enabled, e);
+        }
+    }
+
+    private static void setOptionalFeature(SAXParserFactory factory, String feature, boolean enabled) {
+        try {
+            factory.setFeature(feature, enabled);
+        } catch (ParserConfigurationException e) {
+            // optional: Xerces-specific or provider-specific features
+        } catch (SAXException e) {
+            // optional: Xerces-specific or provider-specific features
+        }
+    }
+
+    private static void setRequiredFeature(XMLReader xmlReader, String feature, boolean enabled) {
+        try {
+            xmlReader.setFeature(feature, enabled);
+        } catch (SAXException e) {
+            throw new RuntimeException("Failed to set XML reader feature " + feature + " to " + enabled, e);
+        }
+    }
+
+    private static void setOptionalFeature(XMLReader xmlReader, String feature, boolean enabled) {
+        try {
+            xmlReader.setFeature(feature, enabled);
+        } catch (SAXException e) {
+            // optional: Xerces-specific or provider-specific features
+        }
+    }
+
+    private static void setRequiredProperty(SAXParser saxParser, String property, String value) {
+        try {
+            saxParser.setProperty(property, value);
+        } catch (SAXException e) {
+            throw new RuntimeException("Failed to set XML parser property " + property, e);
+        }
+    }
+
+    private static void setRequiredProperty(XMLReader xmlReader, String property, String value) {
+        try {
+            xmlReader.setProperty(property, value);
+        } catch (SAXException e) {
+            throw new RuntimeException("Failed to set XML reader property " + property, e);
+        }
+    }
+
+    private static String snippetForError(String xml) {
+        if (xml == null) {
+            return "null";
+        }
+        if (xml.length() <= ERROR_SNIPPET_MAX_LENGTH) {
+            return xml;
+        }
+        return xml.substring(0, ERROR_SNIPPET_MAX_LENGTH) + "... (" + xml.length() + " chars)";
+    }
+
     /**
      * Use SAX to process the XML document
      */
-    public class XMLparser extends DefaultHandler {
+    public class XMLparser extends DefaultHandler implements EntityResolver2 {
         private String xml = null;
         private Map<String, Object> map = null;
         public XMLparser(String xml) {
@@ -658,11 +788,13 @@ public class XMLTranscoder implements Transcoder {
 
         protected void parseXML(String xml) {
             try {
-                getParser().parse( new ByteArrayInputStream(xml.getBytes()), this );
+                getParser().parse(new ByteArrayInputStream(xml.getBytes(XML_INPUT_CHARSET)), this);
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException("Failed to encode XML as " + XML_INPUT_CHARSET, e);
             } catch (SAXException se) {
-                throw new IllegalArgumentException("Failed to parse xml ("+xml+"): " + se.getMessage(), se);
+                throw new IllegalArgumentException("Failed to parse xml (" + snippetForError(xml) + "): " + se.getMessage(), se);
             } catch (IOException ie) {
-                throw new RuntimeException("Failed to convert XML string ("+xml+") into inputstream", ie);
+                throw new RuntimeException("Failed to read XML input (" + snippetForError(xml) + ")", ie);
             }
         }
 
@@ -793,6 +925,22 @@ public class XMLTranscoder implements Transcoder {
             // get the text out of the element
             contents.write(ch, start, length);
             currentContents = true;
+        }
+
+        @Override
+        public InputSource getExternalSubset(String name, String baseURI) throws SAXException, IOException {
+            throw new SAXException("External XML DTD subsets are not allowed");
+        }
+
+        @Override
+        public InputSource resolveEntity(String name, String publicId, String baseURI, String systemId)
+                throws SAXException, IOException {
+            throw new SAXException("External XML entities are not allowed");
+        }
+
+        @Override
+        public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+            throw new SAXException("External XML entities are not allowed");
         }
 
         @Override
