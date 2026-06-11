@@ -204,6 +204,10 @@ public class TranscodersTest extends TestCase {
         assertNull(read);
         read = reader.read("{{{{");
         assertNull(read);
+        read = reader.read("7e");
+        assertNull(read);
+        read = reader.read("7e+");
+        assertNull(read);
 
         // empty
         read = reader.read("{ }");

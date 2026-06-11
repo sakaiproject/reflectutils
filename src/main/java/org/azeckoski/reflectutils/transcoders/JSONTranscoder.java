@@ -555,9 +555,16 @@ public class JSONTranscoder implements Transcoder {
                 add();
             }
             length += addDigits();
+            if (length == 0) {
+                return null;
+            }
             if (c == '.') {
                 add();
-                length += addDigits();
+                int fractionLength = addDigits();
+                if (fractionLength == 0) {
+                    return null;
+                }
+                length += fractionLength;
                 isFloatingPoint = true;
             }
             if (c == 'e' || c == 'E') {
@@ -565,29 +572,35 @@ public class JSONTranscoder implements Transcoder {
                 if (c == '+' || c == '-') {
                     add();
                 }
-                addDigits();
+                if (addDigits() == 0) {
+                    return null;
+                }
                 isFloatingPoint = true;
             }
 
             String s = buf.toString();
             // more friendly handling of numbers
             Object num = null;
-            if (isFloatingPoint) {
-                if (length < 10) {
-                    num = Float.valueOf(s);
-                } else if (length < 17) {
-                    num = Double.valueOf(s);
+            try {
+                if (isFloatingPoint) {
+                    if (length < 10) {
+                        num = Float.valueOf(s);
+                    } else if (length < 17) {
+                        num = Double.valueOf(s);
+                    } else {
+                        num = new BigDecimal(s);
+                    }
                 } else {
-                    num = new BigDecimal(s);
+                    if (length < 10) {
+                        num = Integer.valueOf(s);
+                    } else if (length < 19) {
+                        num = Long.valueOf(s);
+                    } else {
+                        num = new BigInteger(s);
+                    }
                 }
-            } else {
-                if (length < 10) {
-                    num = Integer.valueOf(s);
-                } else if (length < 19) {
-                    num = Long.valueOf(s);
-                } else {
-                    num = new BigInteger(s);
-                }
+            } catch (NumberFormatException e) {
+                num = null;
             }
             return num;
         }
